@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, ViewState, Student } from '../types';
-import { LogOut, Dumbbell, Activity, CalendarDays, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, PlayCircle } from 'lucide-react';
+import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, Home, Target } from 'lucide-react';
 import StudentWorkoutsScreen from './StudentWorkoutsScreen';
 import GoalsAchievementsScreen from './GoalsAchievementsScreen';
 import AIChatScreen from './AIChatScreen';
@@ -18,15 +18,11 @@ type TabState = 'HOME' | 'WORKOUTS' | 'GOALS' | 'COACH';
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onUpdateStudents, onLogout, onNavigate }) => {
   const [activeTab, setActiveTab] = useState<TabState>('HOME');
   const [weather, setWeather] = useState<{temp: number, city: string} | null>(null);
-  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
-  
-  // Calendar State (Only used in Home Tab)
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const studentData = students.find(s => s.id === user.studentId);
 
   useEffect(() => {
-    // Fetch Weather (Rio de Janeiro hardcoded as per request visual)
     const fetchWeather = async () => {
       try {
         const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-22.9068&longitude=-43.1729&current=temperature_2m&timezone=America%2FSao_Paulo');
@@ -37,13 +33,12 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
         });
       } catch (e) {
         console.error("Weather fetch failed", e);
-        setWeather({ temp: 30, city: 'RIO DE JANEIRO' }); // Fallback
+        setWeather({ temp: 30, city: 'RIO DE JANEIRO' });
       }
     };
     fetchWeather();
   }, [user.studentId]);
 
-  // Calendar Logic
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -51,11 +46,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
 
   const renderCalendar = () => {
     const grid = [];
-    // Empty cells for days before the 1st
     for (let i = 0; i < firstDay; i++) {
         grid.push(<div key={`empty-${i}`} className="h-10"></div>);
     }
-    // Days
     days.forEach(day => {
         const isToday = day === new Date().getDate() && currentDate.getMonth() === new Date().getMonth();
         const hasHistory = studentData?.history?.some(h => {
@@ -78,14 +71,8 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
     return grid;
   };
 
-  const handleWorkoutClick = (workoutId: string) => {
-    setSelectedWorkoutId(workoutId);
-    setActiveTab('WORKOUTS');
-  };
-
   const renderHome = () => (
-    <div className="animate-fadeIn pb-10">
-      {/* HEADER */}
+    <div className="animate-fadeIn">
       <header className="px-6 pt-6 pb-2 flex justify-between items-center">
         <div>
            <h2 className="text-3xl font-black italic tracking-tighter transform -skew-x-6">
@@ -101,7 +88,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
         </button>
       </header>
 
-      {/* PROFILE SECTION */}
       <div className="px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
              <div className="relative">
@@ -127,113 +113,43 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
         </div>
       </div>
 
-      {/* ACTION GRID - SPECIFIC WORKOUTS */}
-      <div className="px-4 mb-6">
-        <div className="mb-4">
-           <h3 className="text-sm font-black text-white italic uppercase tracking-wider mb-3 pl-2 border-l-4 border-red-600">Meus Treinos</h3>
-           <div className="grid grid-cols-2 gap-3">
-              {studentData?.workouts && studentData.workouts.length > 0 ? (
-                studentData.workouts.map((workout, index) => (
-                    <button 
-                        key={workout.id}
-                        onClick={() => handleWorkoutClick(workout.id)}
-                        className="group relative w-full aspect-square bg-zinc-900 border border-zinc-800 rounded-3xl p-4 flex flex-col justify-between hover:border-red-600 transition-all active:scale-95 overflow-hidden shadow-lg"
-                    >
-                        {/* Decorative Background Icon */}
-                        <div className="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <Dumbbell className="w-24 h-24 text-white transform rotate-12" />
-                        </div>
+      <div className="px-4 mb-8">
+        <div className="grid grid-cols-4 gap-3">
+             <button 
+                onClick={() => setActiveTab('WORKOUTS')}
+                className="col-span-2 bg-black border border-red-600/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-red-900/10 transition-colors shadow-lg shadow-red-900/10 h-32"
+             >
+                <Dumbbell className="w-8 h-8 text-red-600" />
+                <span className="text-xs font-bold uppercase tracking-wider text-white">Ir para Treino</span>
+             </button>
 
-                        <div className="w-10 h-10 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 group-hover:bg-red-600 group-hover:text-white transition-colors z-10">
-                            <span className="font-black text-lg italic">{index + 1}</span>
-                        </div>
+             <button 
+                onClick={() => onNavigate('ASSESSMENT_VIEW')}
+                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-32"
+             >
+                <ClipboardList className="w-8 h-8 text-pink-500" />
+                <span className="text-[10px] font-bold uppercase text-zinc-300">Minha Avaliação</span>
+             </button>
 
-                        <div className="text-left w-full z-10">
-                            <h4 className="text-xl font-black text-white italic uppercase leading-tight mb-1 line-clamp-2">{workout.title}</h4>
-                            
-                            <div className="flex items-center justify-between mt-2">
-                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{workout.exercises.length} EXERCÍCIOS</p>
-                                <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
-                                   <div className="bg-red-600 rounded-full p-1 shadow-lg shadow-red-900/40">
-                                      <PlayCircle className="w-4 h-4 fill-white text-white" />
-                                   </div>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-                ))
-              ) : (
-                <div className="col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 text-center">
-                    <p className="text-zinc-500 text-sm">Nenhum treino atribuído ainda.</p>
-                </div>
-              )}
-           </div>
-        </div>
-
-        {/* MENU RÁPIDO - CARDS */}
-        <div>
-             <h3 className="text-sm font-black text-white italic uppercase tracking-wider mb-3 pl-2 border-l-4 border-zinc-700">Menu Rápido</h3>
-             <div className="grid grid-cols-2 gap-3">
-                 {/* Goals */}
-                 <button 
-                    onClick={() => setActiveTab('GOALS')} 
-                    className="bg-zinc-900/50 border border-zinc-800 hover:border-yellow-600/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
-                 >
-                    <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-black transition-colors">
-                        <CalendarDays className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <span className="text-lg font-bold text-white block">Metas</span>
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Acompanhar</span>
-                    </div>
-                 </button>
-
-                 {/* Coach AI */}
-                 <button 
-                    onClick={() => setActiveTab('COACH')} 
-                    className="bg-zinc-900/50 border border-zinc-800 hover:border-red-600/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
-                 >
-                    <div className="w-10 h-10 rounded-lg bg-red-600/10 flex items-center justify-center text-red-500 group-hover:bg-red-600 group-hover:text-white transition-colors">
-                        <Brain className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <span className="text-lg font-bold text-white block">Coach IA</span>
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Tirar Dúvidas</span>
-                    </div>
-                 </button>
-
-                 {/* Assessment */}
-                 <button 
-                    onClick={() => onNavigate('ASSESSMENT_VIEW')}
-                    className="bg-zinc-900/50 border border-zinc-800 hover:border-pink-600/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
-                 >
-                    <div className="w-10 h-10 rounded-lg bg-pink-600/10 flex items-center justify-center text-pink-500 group-hover:bg-pink-600 group-hover:text-white transition-colors">
-                        <ClipboardList className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <span className="text-lg font-bold text-white block">Avaliação</span>
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Resultados</span>
-                    </div>
-                 </button>
-
-                 {/* Running */}
-                 <button 
-                    onClick={() => onNavigate('RUNNING_WORKOUTS')} 
-                    className="bg-zinc-900/50 border border-zinc-800 hover:border-orange-500/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
-                 >
-                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                        <Activity className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <span className="text-lg font-bold text-white block">Corrida</span>
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Planilha</span>
-                    </div>
-                 </button>
-             </div>
+             <button onClick={() => onNavigate('RUNNING_WORKOUTS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+                <Activity className="w-6 h-6 text-orange-500" />
+                <span className="text-[9px] font-bold uppercase text-zinc-300">Corrida</span>
+             </button>
+             <button onClick={() => setActiveTab('GOALS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+                <CalendarDays className="w-6 h-6 text-yellow-500" />
+                <span className="text-[9px] font-bold uppercase text-zinc-300">Metas</span>
+             </button>
+             <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+                <Map className="w-6 h-6 text-green-500" />
+                <span className="text-[9px] font-bold uppercase text-zinc-300">Outdoor</span>
+             </button>
+             <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+                <Flag className="w-6 h-6 text-blue-500" />
+                <span className="text-[9px] font-bold uppercase text-zinc-300">Provas</span>
+             </button>
         </div>
       </div>
 
-      {/* CALENDAR SECTION */}
       <div className="px-6 mb-8">
          <div className="flex justify-between items-center mb-4">
              <h3 className="text-lg font-bold text-white">{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</h3>
@@ -253,8 +169,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
          </div>
       </div>
 
-      {/* HISTORY SECTION */}
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-24">
          <h3 className="text-lg font-bold text-white mb-4">Histórico Recente</h3>
          <div className="space-y-3">
              {(!studentData?.history || studentData.history.length === 0) ? (
@@ -290,8 +205,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a0505] to-black text-white">
       
-      {/* Content Area */}
-      <main className="pb-6">
+      <main className="pb-20">
         {activeTab === 'HOME' && renderHome()}
         
         {activeTab === 'WORKOUTS' && (
@@ -299,7 +213,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
             <StudentWorkoutsScreen 
               studentId={user.studentId} 
               students={students} 
-              initialWorkoutId={selectedWorkoutId}
               onBack={() => setActiveTab('HOME')} 
             />
           </div>
@@ -326,7 +239,44 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
         )}
       </main>
 
-      {/* REMOVED BOTTOM NAVIGATION BAR */}
+      {/* Barra de Navegação Responsiva */}
+      <div className="fixed bottom-0 left-0 w-full z-50">
+        <div className="w-full md:max-w-4xl mx-auto bg-black/90 backdrop-blur-xl border-t border-zinc-800 pb-safe">
+            <div className="grid grid-cols-4 h-16">
+              <button 
+                onClick={() => setActiveTab('HOME')}
+                className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'HOME' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                <Home className="w-5 h-5" strokeWidth={activeTab === 'HOME' ? 3 : 2} />
+                <span className="text-[10px] font-bold uppercase tracking-wide">Início</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveTab('WORKOUTS')}
+                className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'WORKOUTS' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                <Dumbbell className="w-5 h-5" strokeWidth={activeTab === 'WORKOUTS' ? 3 : 2} />
+                <span className="text-[10px] font-bold uppercase tracking-wide">Treinos</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveTab('GOALS')}
+                className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'GOALS' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                <Target className="w-5 h-5" strokeWidth={activeTab === 'GOALS' ? 3 : 2} />
+                <span className="text-[10px] font-bold uppercase tracking-wide">Metas</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveTab('COACH')}
+                className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'COACH' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                <Brain className="w-5 h-5" strokeWidth={activeTab === 'COACH' ? 3 : 2} />
+                <span className="text-[10px] font-bold uppercase tracking-wide">Coach</span>
+              </button>
+            </div>
+        </div>
+      </div>
 
     </div>
   );
