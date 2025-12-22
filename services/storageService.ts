@@ -2,6 +2,11 @@ import { Student, Achievement, RunningWorkout } from '../types';
 
 const STORAGE_KEY = 'physiapp_alunos';
 
+// URL da nova foto de perfil (Substitua esta URL pela da sua foto real se desejar)
+// Opção 1: URL de imagem hospedada (Imgur, S3, etc)
+// Opção 2: Caminho local na pasta public (ex: '/minha-foto.jpg')
+const ANDRE_PHOTO_URL = 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=200&auto=format&fit=crop';
+
 export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'welcome', title: 'Bem-vindo ao Time', description: 'Iniciou sua jornada na ABFIT', icon: 'medal', unlocked: true, unlockedAt: new Date().toISOString() },
   { id: 'first_assessment', title: 'Primeiros Passos', description: 'Realizou a primeira avaliação física', icon: 'zap', unlocked: false },
@@ -114,7 +119,9 @@ export const saveStudents = (students: Student[]) => {
 
 export const initData = () => {
   const existing = getStudents();
+  
   if (existing.length === 0) {
+    // Initial Data Creation
     const defaultStudents: Student[] = [
       { 
         id: '1', 
@@ -122,7 +129,7 @@ export const initData = () => {
         email: 'britodeandrade@gmail.com', 
         sexo: 'Masculino', 
         nascimento: '1990-01-01', 
-        photoUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop',
+        photoUrl: ANDRE_PHOTO_URL, // Updated photo URL
         avaliacoes: [], 
         goals: [], 
         achievements: [],
@@ -184,6 +191,21 @@ export const initData = () => {
        achievements: DEFAULT_ACHIEVEMENTS.map(a => ({...a, unlocked: a.id === 'welcome' ? true : false, unlockedAt: a.id === 'welcome' ? new Date().toISOString() : undefined}))
     }));
     saveStudents(studentsWithAchievements);
+  } else {
+    // FORCE UPDATE: Check if André (ID 1) needs a profile photo update
+    // This allows the photo to change even if the user already has data stored.
+    let hasChanges = false;
+    const updatedStudents = existing.map(s => {
+        if (s.id === '1' && s.photoUrl !== ANDRE_PHOTO_URL) {
+            hasChanges = true;
+            return { ...s, photoUrl: ANDRE_PHOTO_URL };
+        }
+        return s;
+    });
+
+    if (hasChanges) {
+        saveStudents(updatedStudents);
+    }
   }
 };
 
