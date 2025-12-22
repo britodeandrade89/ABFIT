@@ -170,7 +170,7 @@ const GoalsAchievementsScreen: React.FC<GoalsAchievementsScreenProps> = ({
                    <div className="flex-1">
                       <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
                         <div 
-                          className={`h-full rounded-full ${goal.completed ? 'bg-green-500' : 'bg-red-600'}`} 
+                          className={`h-full rounded-full transition-all duration-500 ${goal.completed ? 'bg-green-500' : 'bg-red-600'}`} 
                           style={{ width: `${Math.min(100, (goal.current / goal.target) * 100)}%` }}
                         ></div>
                       </div>
@@ -179,26 +179,26 @@ const GoalsAchievementsScreen: React.FC<GoalsAchievementsScreenProps> = ({
                       </p>
                    </div>
                    
-                   {!goal.completed ? (
-                     <div className="flex gap-2">
-                       <button 
-                         onClick={() => updateGoalProgress(goal.id, -1)}
-                         className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-zinc-700"
-                       >
-                         <Minus className="w-4 h-4" />
-                       </button>
-                       <button 
-                         onClick={() => updateGoalProgress(goal.id, 1)}
-                         className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white hover:bg-red-500 shadow-lg shadow-red-900/20"
-                       >
-                         <Plus className="w-4 h-4" />
-                       </button>
-                     </div>
-                   ) : (
-                     <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
-                       <CheckCircle className="w-5 h-5" />
-                     </div>
-                   )}
+                   <div className="flex items-center gap-2">
+                     {goal.completed && (
+                       <div className="mr-1 text-green-500 animate-fadeIn">
+                         <CheckCircle className="w-5 h-5" />
+                       </div>
+                     )}
+                     <button 
+                       onClick={() => updateGoalProgress(goal.id, -1)}
+                       className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 hover:bg-zinc-700 active:scale-95 transition-all"
+                       disabled={goal.current <= 0}
+                     >
+                       <Minus className="w-4 h-4" />
+                     </button>
+                     <button 
+                       onClick={() => updateGoalProgress(goal.id, 1)}
+                       className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white hover:bg-red-500 shadow-lg shadow-red-900/20 active:scale-95 transition-all"
+                     >
+                       <Plus className="w-4 h-4" />
+                     </button>
+                   </div>
                 </div>
               </div>
             ))}

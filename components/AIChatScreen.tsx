@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Bot, User as UserIcon, Loader2 } from 'lucide-react';
-import { sendMessage } from '../services/geminiService';
+import { sendMessage, resetChat } from '../services/geminiService';
 import ReactMarkdown from 'react-markdown';
 
 interface AIChatScreenProps {
@@ -29,6 +29,12 @@ const AIChatScreen: React.FC<AIChatScreenProps> = ({ onBack, userName }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    // Reset the AI session when entering the screen to ensure
+    // the conversation context matches the fresh UI state.
+    resetChat();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();

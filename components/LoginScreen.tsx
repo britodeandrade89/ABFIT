@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { User, Student } from '../types';
-import { ChevronDown, User as UserIcon } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
 
 interface LoginScreenProps {
   onLogin: (user: User) => void;
@@ -70,11 +70,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, students }) => {
   return (
     <div 
       id="loginScreen" 
-      className="flex flex-col justify-end min-h-screen pb-20 px-8 animate-fadeIn"
+      className="h-screen flex flex-col justify-center items-center p-8 w-full animate-fadeIn"
+      style={{
+        backgroundImage: `radial-gradient(circle at center, #1a1a1a 0%, #000000 100%)`
+      }}
     >
-      
-      <div className="mb-auto pt-24 text-center">
-        <div className="logo-wrapper transform scale-110">
+      <div className="text-center mb-10 transform">
+        <div className="logo-wrapper">
             <h1 className="logo-main text-8xl mb-1">
                 <span className="logo-ab">AB</span><span className="logo-fit">FIT</span>
             </h1>
@@ -83,35 +85,26 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, students }) => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="w-full space-y-4 backdrop-blur-sm bg-black/40 p-6 rounded-2xl border border-white/10 relative">
-        <div ref={wrapperRef} className="relative">
-          <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-wider">
-            Acesso Exclusivo
-          </label>
-          
-          <div className="relative">
-            <input
-              type="text"
-              required
-              placeholder="Seu e-mail ou 'professor'"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              className="w-full p-4 rounded-xl text-lg bg-black/50 border border-zinc-800 text-white placeholder-gray-600 focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all outline-none"
-              autoComplete="off"
-            />
-            {/* Ícone indicando dropdown */}
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
-              <ChevronDown className={`w-5 h-5 transition-transform ${showSuggestions ? 'rotate-180' : ''}`} />
-            </div>
-          </div>
+      <form onSubmit={handleSubmit} className="w-full max-w-xs flex flex-col gap-4 relative">
+        <div ref={wrapperRef} className="relative group w-full">
+          <input
+            type="text"
+            required
+            placeholder="Seu e-mail de aluno"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            className="w-full p-4 bg-transparent border-b-2 border-gray-600 text-white text-center text-lg placeholder-gray-500 focus:border-red-600 focus:outline-none transition-all rounded-none"
+            autoComplete="off"
+          />
+          <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-red-600 transition-all duration-300 group-focus-within:w-full pointer-events-none"></div>
 
           {/* Lista de Sugestões (Dropdown Customizado) */}
           {showSuggestions && filteredSuggestions.length > 0 && (
-            <div className="absolute bottom-full left-0 w-full mb-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl max-h-60 overflow-y-auto z-50 animate-fadeIn custom-scrollbar">
+            <div className="absolute top-full left-0 w-full mt-2 bg-zinc-900/95 border border-zinc-700 rounded-xl shadow-2xl max-h-60 overflow-y-auto z-50 animate-fadeIn custom-scrollbar">
               {filteredSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
@@ -131,15 +124,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, students }) => {
 
         <button
           type="submit"
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-black uppercase py-4 rounded-xl shadow-lg shadow-red-900/40 transition-all transform active:scale-95 text-sm tracking-widest"
+          className="mt-6 w-full bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black uppercase tracking-widest py-4 rounded-xl shadow-lg shadow-red-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Acessar Plataforma
+          ENTRAR
         </button>
+        
+        <a href="mailto:contato@abfit.com.br" className="text-gray-500 text-center text-xs mt-4 hover:text-gray-300 transition-colors">
+            Precisa de ajuda? Fale com o suporte.
+        </a>
       </form>
-      
-      <p className="mt-6 text-center text-[10px] text-gray-600 font-mono">
-        v3.0 FIX &bull; SYSTEM ONLINE
-      </p>
     </div>
   );
 };

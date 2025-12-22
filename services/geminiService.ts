@@ -12,12 +12,15 @@ Responda sempre em Português do Brasil.
 `;
 
 export const initializeChat = async () => {
-  if (!process.env.API_KEY) {
-    console.error("API Key not found");
+  // Always use the environment variable for the API key
+  const apiKey = process.env.API_KEY;
+
+  if (!apiKey) {
+    console.error("API Key not found in environment variables");
     return;
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: apiKey });
   
   chatSession = ai.chats.create({
     model: 'gemini-3-flash-preview',
@@ -25,6 +28,10 @@ export const initializeChat = async () => {
       systemInstruction: SYSTEM_INSTRUCTION,
     }
   });
+};
+
+export const resetChat = () => {
+  chatSession = null;
 };
 
 export const sendMessage = async (message: string): Promise<string> => {

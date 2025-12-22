@@ -1,5 +1,5 @@
 {
-  "name": "abfit---assessoria-esportiva",
+  "name": "1.5-abfit",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -14,7 +14,8 @@
     "lucide-react": "^0.562.0",
     "recharts": "^3.6.0",
     "react-markdown": "^10.1.0",
-    "react": "^19.2.3"
+    "react": "^19.2.3",
+    "firebase": "^12.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

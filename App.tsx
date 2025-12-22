@@ -9,6 +9,7 @@ import AIChatScreen from './components/AIChatScreen';
 import GoalsAchievementsScreen from './components/GoalsAchievementsScreen';
 import WorkoutManagerScreen from './components/WorkoutManagerScreen';
 import StudentWorkoutsScreen from './components/StudentWorkoutsScreen';
+import './services/firebaseConfig'; // Initialize Firebase
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
