@@ -10,6 +10,7 @@ import GoalsAchievementsScreen from './components/GoalsAchievementsScreen';
 import WorkoutManagerScreen from './components/WorkoutManagerScreen';
 import StudentWorkoutsScreen from './components/StudentWorkoutsScreen';
 import RunningWorkoutsScreen from './components/RunningWorkoutsScreen';
+import { InstallPrompt } from './components/InstallPrompt';
 import './services/firebaseConfig'; // Initialize Firebase
 
 const App: React.FC = () => {
@@ -52,6 +53,8 @@ const App: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto min-h-screen relative shadow-2xl overflow-hidden text-white font-sans">
+      <InstallPrompt />
+      
       {currentView === 'LOGIN' && (
         <LoginScreen onLogin={handleLogin} students={students} />
       )}

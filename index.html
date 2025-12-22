@@ -155,21 +155,23 @@
 </head>
 <body class="overscroll-none bg-black">
     <div id="root"></div>
+    
+    <!-- Entry point for React -->
     <script type="module" src="./index.tsx"></script>
+
     <script>
-      /* Service Worker disabled for Vercel deployment stability
-      if ('serviceWorker' in navigator) {
+       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js')
+          // Certifique-se que o arquivo service-worker.js está na pasta public
+          navigator.serviceWorker.register('/service-worker.js')
             .then(registration => {
-              console.log('SW registered: ', registration);
+              console.log('SW registrado com sucesso:', registration);
             })
             .catch(registrationError => {
-              console.log('SW registration failed: ', registrationError);
+              console.log('Falha ao registrar SW:', registrationError);
             });
         });
       }
-      */
     </script>
 </body>
 </html>
