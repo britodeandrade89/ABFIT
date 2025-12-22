@@ -9,6 +9,7 @@ import AIChatScreen from './components/AIChatScreen';
 import GoalsAchievementsScreen from './components/GoalsAchievementsScreen';
 import WorkoutManagerScreen from './components/WorkoutManagerScreen';
 import StudentWorkoutsScreen from './components/StudentWorkoutsScreen';
+import RunningWorkoutsScreen from './components/RunningWorkoutsScreen';
 import './services/firebaseConfig'; // Initialize Firebase
 
 const App: React.FC = () => {
@@ -112,6 +113,15 @@ const App: React.FC = () => {
         <StudentWorkoutsScreen 
           studentId={currentUser.studentId}
           students={students}
+          onBack={() => handleNavigate('STUDENT_DASHBOARD')}
+        />
+      )}
+
+      {currentView === 'RUNNING_WORKOUTS' && currentUser?.studentId && (
+        <RunningWorkoutsScreen 
+          studentId={currentUser.studentId}
+          students={students}
+          onUpdateStudents={updateStudents}
           onBack={() => handleNavigate('STUDENT_DASHBOARD')}
         />
       )}

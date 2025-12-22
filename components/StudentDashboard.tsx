@@ -142,7 +142,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
              </button>
 
              {/* Shortcuts */}
-             <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => onNavigate('RUNNING_WORKOUTS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <Activity className="w-6 h-6 text-orange-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Corrida</span>
              </button>

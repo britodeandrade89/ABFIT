@@ -1,3 +1,4 @@
+
 import { Student, Achievement } from '../types';
 
 const STORAGE_KEY = 'physiapp_alunos';
@@ -21,6 +22,7 @@ export const getStudents = (): Student[] => {
     ...s,
     goals: s.goals || [],
     workouts: s.workouts || [],
+    runningWorkouts: s.runningWorkouts || [],
     history: s.history || [],
     achievements: (s.achievements && s.achievements.length > 0) 
       ? s.achievements 
@@ -45,7 +47,29 @@ export const initData = () => {
         photoUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop', // Placeholder pro André
         avaliacoes: [], 
         goals: [], 
-        achievements: [], 
+        achievements: [],
+        runningWorkouts: [
+          {
+            id: 'run1',
+            title: 'Rodagem Leve',
+            targetDuration: '40min',
+            targetDistance: '5km',
+            warmup: '10min caminhada rápida + 5min trote leve.',
+            main: '20min corrida contínua em Z2 (Ritmo confortável). Foco na respiração.',
+            cooldown: '5min caminhada para baixar a frequência cardíaca.',
+            status: 'pending'
+          },
+          {
+            id: 'run2',
+            title: 'Tiro de Velocidade',
+            targetDuration: '30min',
+            targetDistance: '4km',
+            warmup: '15min trote leve.',
+            main: '10x tiros de 1min forte (Z4) com 1min de descanso (caminhada).',
+            cooldown: '5min trote muito leve.',
+            status: 'pending'
+          }
+        ], 
         workouts: [
           {
             id: 'treino-a-andre',
@@ -91,10 +115,10 @@ export const initData = () => {
             { id: 'h4', date: '2025-12-08', workoutTitle: 'Treino A', duration: '50 min', status: 'completed' }
         ]
       },
-      { id: '2', nome: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', sexo: 'Feminino', nascimento: '1992-05-15', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] },
-      { id: '3', nome: 'Marcia Brito', email: 'andrademarcia.ucam@gmail.com', sexo: 'Feminino', nascimento: '1985-03-20', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] },
-      { id: '4', nome: 'Rebecca Brito', email: 'arbrito.andrade@gmail.com', sexo: 'Feminino', nascimento: '2000-08-10', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] },
-      { id: '5', nome: 'Liliane Torres', email: 'lilicatorres@gmail.com', sexo: 'Feminino', nascimento: '1988-11-05', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] }
+      { id: '2', nome: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', sexo: 'Feminino', nascimento: '1992-05-15', avaliacoes: [], goals: [], achievements: [], runningWorkouts: [], workouts: [], history: [] },
+      { id: '3', nome: 'Marcia Brito', email: 'andrademarcia.ucam@gmail.com', sexo: 'Feminino', nascimento: '1985-03-20', avaliacoes: [], goals: [], achievements: [], runningWorkouts: [], workouts: [], history: [] },
+      { id: '4', nome: 'Rebecca Brito', email: 'arbrito.andrade@gmail.com', sexo: 'Feminino', nascimento: '2000-08-10', avaliacoes: [], goals: [], achievements: [], runningWorkouts: [], workouts: [], history: [] },
+      { id: '5', nome: 'Liliane Torres', email: 'lilicatorres@gmail.com', sexo: 'Feminino', nascimento: '1988-11-05', avaliacoes: [], goals: [], achievements: [], runningWorkouts: [], workouts: [], history: [] }
     ];
     
     // Apply default achievements

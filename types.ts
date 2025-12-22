@@ -1,3 +1,4 @@
+
 export interface Assessment {
   date: string;
   weight: number;
@@ -49,6 +50,18 @@ export interface WorkoutHistory {
   status: 'completed' | 'skipped';
 }
 
+export interface RunningWorkout {
+  id: string;
+  title: string;
+  targetDistance: string; // e.g., "5km"
+  targetDuration: string; // e.g., "30min"
+  warmup: string;
+  main: string;
+  cooldown: string;
+  status: 'pending' | 'completed';
+  date?: string; // Optional scheduling
+}
+
 export interface Student {
   id: string;
   nome: string;
@@ -60,6 +73,7 @@ export interface Student {
   goals: Goal[];
   achievements: Achievement[];
   workouts: Workout[];
+  runningWorkouts: RunningWorkout[];
   history: WorkoutHistory[];
 }
 
@@ -79,4 +93,5 @@ export type ViewState =
   | 'AI_CHAT'
   | 'GOALS_VIEW'
   | 'WORKOUT_MANAGER' // For Professor
-  | 'STUDENT_WORKOUTS'; // For Student
+  | 'STUDENT_WORKOUTS' // For Student
+  | 'RUNNING_WORKOUTS'; // New View

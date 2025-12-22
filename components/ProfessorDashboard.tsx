@@ -32,6 +32,7 @@ export const ProfessorDashboard: React.FC<ProfessorDashboardProps> = ({
       avaliacoes: [],
       goals: [],
       workouts: [],
+      runningWorkouts: [],
       history: [],
       achievements: DEFAULT_ACHIEVEMENTS.map(a => ({
         ...a, 
