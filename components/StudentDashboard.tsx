@@ -132,30 +132,39 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
       <div className="px-4 mb-8">
         <div className="mb-4">
            <h3 className="text-sm font-black text-white italic uppercase tracking-wider mb-3 pl-2 border-l-4 border-red-600">Meus Treinos</h3>
-           <div className="flex flex-col gap-3">
+           <div className="grid grid-cols-2 gap-3">
               {studentData?.workouts && studentData.workouts.length > 0 ? (
                 studentData.workouts.map((workout, index) => (
                     <button 
                         key={workout.id}
                         onClick={() => handleWorkoutClick(workout.id)}
-                        className="group w-full bg-gradient-to-r from-zinc-900 to-black border border-zinc-800 rounded-2xl p-5 flex items-center justify-between hover:border-red-600/50 transition-all shadow-lg active:scale-[0.98]"
+                        className="group relative w-full aspect-square bg-zinc-900 border border-zinc-800 rounded-3xl p-4 flex flex-col justify-between hover:border-red-600 transition-all active:scale-95 overflow-hidden shadow-lg"
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-red-900/20 flex items-center justify-center border border-red-900/30 group-hover:bg-red-600 group-hover:text-white text-red-600 transition-colors">
-                                <Dumbbell className="w-6 h-6" />
-                            </div>
-                            <div className="text-left">
-                                <h4 className="text-lg font-black text-white italic uppercase">{workout.title}</h4>
-                                <p className="text-xs text-zinc-500 font-medium">{workout.description || `${workout.exercises.length} exercícios`}</p>
-                            </div>
+                        {/* Decorative Background Icon */}
+                        <div className="absolute -right-2 -top-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Dumbbell className="w-24 h-24 text-white transform rotate-12" />
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
-                            <PlayCircle className="w-5 h-5" />
+
+                        <div className="w-10 h-10 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 group-hover:bg-red-600 group-hover:text-white transition-colors z-10">
+                            <span className="font-black text-lg italic">{index + 1}</span>
+                        </div>
+
+                        <div className="text-left w-full z-10">
+                            <h4 className="text-xl font-black text-white italic uppercase leading-tight mb-1 line-clamp-2">{workout.title}</h4>
+                            
+                            <div className="flex items-center justify-between mt-2">
+                                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{workout.exercises.length} EXERCÍCIOS</p>
+                                <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
+                                   <div className="bg-red-600 rounded-full p-1 shadow-lg shadow-red-900/40">
+                                      <PlayCircle className="w-4 h-4 fill-white text-white" />
+                                   </div>
+                                </div>
+                            </div>
                         </div>
                     </button>
                 ))
               ) : (
-                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 text-center">
+                <div className="col-span-2 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 text-center">
                     <p className="text-zinc-500 text-sm">Nenhum treino atribuído ainda.</p>
                 </div>
               )}
