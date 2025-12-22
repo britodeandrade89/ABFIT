@@ -21,6 +21,7 @@ export const getStudents = (): Student[] => {
     ...s,
     goals: s.goals || [],
     workouts: s.workouts || [],
+    history: s.history || [],
     achievements: (s.achievements && s.achievements.length > 0) 
       ? s.achievements 
       : DEFAULT_ACHIEVEMENTS.map(a => ({...a, unlocked: a.id === 'welcome' ? true : false, unlockedAt: a.id === 'welcome' ? new Date().toISOString() : undefined}))
@@ -35,11 +36,28 @@ export const initData = () => {
   const existing = getStudents();
   if (existing.length === 0) {
     const defaultStudents: Student[] = [
-      { id: '1', nome: 'André Brito', email: 'britodeandrade@gmail.com', sexo: 'Masculino', nascimento: '1990-01-01', avaliacoes: [], goals: [], achievements: [], workouts: [] },
-      { id: '2', nome: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', sexo: 'Feminino', nascimento: '1992-05-15', avaliacoes: [], goals: [], achievements: [], workouts: [] },
-      { id: '3', nome: 'Marcia Brito', email: 'andrademarcia.ucam@gmail.com', sexo: 'Feminino', nascimento: '1985-03-20', avaliacoes: [], goals: [], achievements: [], workouts: [] },
-      { id: '4', nome: 'Rebecca Brito', email: 'arbrito.andrade@gmail.com', sexo: 'Feminino', nascimento: '2000-08-10', avaliacoes: [], goals: [], achievements: [], workouts: [] },
-      { id: '5', nome: 'Liliane Torres', email: 'lilicatorres@gmail.com', sexo: 'Feminino', nascimento: '1988-11-05', avaliacoes: [], goals: [], achievements: [], workouts: [] }
+      { 
+        id: '1', 
+        nome: 'André Brito', 
+        email: 'britodeandrade@gmail.com', 
+        sexo: 'Masculino', 
+        nascimento: '1990-01-01', 
+        photoUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop', // Placeholder pro André
+        avaliacoes: [], 
+        goals: [], 
+        achievements: [], 
+        workouts: [],
+        history: [
+            { id: 'h1', date: '2025-12-22', workoutTitle: 'Treino A', duration: '54 min', status: 'completed' },
+            { id: 'h2', date: '2025-12-10', workoutTitle: 'Treino A', duration: '37 min', status: 'completed' },
+            { id: 'h3', date: '2025-12-09', workoutTitle: 'Treino B', duration: '50 min', status: 'completed' },
+            { id: 'h4', date: '2025-12-08', workoutTitle: 'Treino A', duration: '50 min', status: 'completed' }
+        ]
+      },
+      { id: '2', nome: 'Marcelly Bispo', email: 'marcellybispo92@gmail.com', sexo: 'Feminino', nascimento: '1992-05-15', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] },
+      { id: '3', nome: 'Marcia Brito', email: 'andrademarcia.ucam@gmail.com', sexo: 'Feminino', nascimento: '1985-03-20', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] },
+      { id: '4', nome: 'Rebecca Brito', email: 'arbrito.andrade@gmail.com', sexo: 'Feminino', nascimento: '2000-08-10', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] },
+      { id: '5', nome: 'Liliane Torres', email: 'lilicatorres@gmail.com', sexo: 'Feminino', nascimento: '1988-11-05', avaliacoes: [], goals: [], achievements: [], workouts: [], history: [] }
     ];
     
     // Apply default achievements

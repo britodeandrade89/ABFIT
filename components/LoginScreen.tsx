@@ -55,7 +55,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, students }) => {
         name: student.nome,
         email: student.email,
         role: 'student',
-        studentId: student.id
+        studentId: student.id,
+        photoUrl: student.photoUrl
       });
     } else {
       alert('E-mail não encontrado. Verifique ou contate o professor.');

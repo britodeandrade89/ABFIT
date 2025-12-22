@@ -41,16 +41,26 @@ export interface Workout {
   exercises: Exercise[];
 }
 
+export interface WorkoutHistory {
+  id: string;
+  date: string; // ISO Date string (YYYY-MM-DD)
+  workoutTitle: string;
+  duration: string;
+  status: 'completed' | 'skipped';
+}
+
 export interface Student {
   id: string;
   nome: string;
   email: string;
   nascimento: string;
   sexo: string;
+  photoUrl?: string;
   avaliacoes: Assessment[];
   goals: Goal[];
   achievements: Achievement[];
   workouts: Workout[];
+  history: WorkoutHistory[];
 }
 
 export interface User {
@@ -58,6 +68,7 @@ export interface User {
   email: string;
   role: 'admin' | 'student';
   studentId?: string;
+  photoUrl?: string;
 }
 
 export type ViewState = 
