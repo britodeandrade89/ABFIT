@@ -12,22 +12,27 @@ Responda sempre em Português do Brasil.
 `;
 
 export const initializeChat = async () => {
-  // Always use the environment variable for the API key
-  const apiKey = process.env.API_KEY;
+  // Garante o acesso à chave API, seja via process.env (Node/Polyfill) ou window global
+  const apiKey = process.env.API_KEY || (window as any).process?.env?.API_KEY;
 
   if (!apiKey) {
-    console.error("API Key not found in environment variables");
+    console.error("CRÍTICO: API Key não encontrada. Verifique o arquivo .env ou o polyfill em main.tsx");
     return;
   }
 
-  const ai = new GoogleGenAI({ apiKey: apiKey });
-  
-  chatSession = ai.chats.create({
-    model: 'gemini-3-flash-preview',
-    config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
-    }
-  });
+  try {
+    const ai = new GoogleGenAI({ apiKey: apiKey });
+    
+    chatSession = ai.chats.create({
+      model: 'gemini-3-flash-preview',
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION,
+      }
+    });
+    console.log("IA Conectada com sucesso.");
+  } catch (error) {
+    console.error("Erro ao inicializar IA:", error);
+  }
 };
 
 export const resetChat = () => {
@@ -40,7 +45,8 @@ export const sendMessage = async (message: string): Promise<string> => {
   }
   
   if (!chatSession) {
-    throw new Error("Failed to initialize AI session");
+    // Retorna mensagem amigável em vez de erro técnico
+    return "Não foi possível conectar ao servidor da IA. Verifique sua conexão ou a chave API.";
   }
 
   try {
