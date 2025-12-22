@@ -37,29 +37,41 @@ export interface Exercise {
 
 export interface Workout {
   id: string;
-  title: string; // e.g., "Treino A - Peito e Tríceps"
+  title: string;
   description?: string;
   exercises: Exercise[];
 }
 
 export interface WorkoutHistory {
   id: string;
-  date: string; // ISO Date string (YYYY-MM-DD)
+  date: string;
   workoutTitle: string;
   duration: string;
   status: 'completed' | 'skipped';
 }
 
+export interface RunningWorkoutFeedback {
+  rpe: number; // 1-10
+  actualDistance: number; // km
+  actualDuration: number; // minutes
+  pace: string; // min/km
+  notes?: string;
+}
+
 export interface RunningWorkout {
   id: string;
+  type: 'TIRO' | 'RODAGEM' | 'FARTLEK' | 'RITMO' | 'LONGO';
   title: string;
-  targetDistance: string; // e.g., "5km"
-  targetDuration: string; // e.g., "30min"
+  scheduledDate: string; // YYYY-MM-DD
+  targetDistance: string; // Display string e.g. "5km"
+  targetDistanceNum: number; // Numeric for calculation
+  targetDuration: string; // Display string e.g. "30min"
+  targetDurationNum: number; // Numeric for calculation
   warmup: string;
   main: string;
   cooldown: string;
   status: 'pending' | 'completed';
-  date?: string; // Optional scheduling
+  feedback?: RunningWorkoutFeedback;
 }
 
 export interface Student {
@@ -92,6 +104,6 @@ export type ViewState =
   | 'ASSESSMENT_VIEW' 
   | 'AI_CHAT'
   | 'GOALS_VIEW'
-  | 'WORKOUT_MANAGER' // For Professor
-  | 'STUDENT_WORKOUTS' // For Student
-  | 'RUNNING_WORKOUTS'; // New View
+  | 'WORKOUT_MANAGER'
+  | 'STUDENT_WORKOUTS'
+  | 'RUNNING_WORKOUTS';

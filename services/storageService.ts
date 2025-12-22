@@ -1,5 +1,4 @@
-
-import { Student, Achievement } from '../types';
+import { Student, Achievement, RunningWorkout } from '../types';
 
 const STORAGE_KEY = 'physiapp_alunos';
 
@@ -11,13 +10,92 @@ export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'star_student', title: 'Dedicação', description: 'Manteve 3 metas ativas simultaneamente', icon: 'star', unlocked: false },
 ];
 
+const generateRunningSchedule = (): RunningWorkout[] => {
+  const schedule: RunningWorkout[] = [];
+  // Start date: Dec 1, 2025 (Monday)
+  let currentDate = new Date('2025-12-01T12:00:00');
+  
+  // Create 4 weeks of workouts
+  for (let week = 0; week < 4; week++) {
+    // 1. Monday: Tiros (Intervals)
+    schedule.push({
+      id: `run_week${week}_1`,
+      type: 'TIRO',
+      title: 'Tiros Intensos (HIIT)',
+      scheduledDate: currentDate.toISOString().split('T')[0],
+      targetDistance: 'Variável',
+      targetDistanceNum: 5, // Estimated base
+      targetDuration: '30min',
+      targetDurationNum: 30,
+      warmup: '10min: Caminhada progressiva (5km/h) a trote leve (8km/h).',
+      main: '15min: 10x 1min Forte (12-14km/h) / 30s Caminhada. Sinta a queimação!',
+      cooldown: '5min: Caminhada lenta para voltar à calma.',
+      status: 'pending'
+    });
+
+    // Move to Wednesday (Rodagem)
+    currentDate.setDate(currentDate.getDate() + 2);
+    schedule.push({
+      id: `run_week${week}_2`,
+      type: 'RODAGEM',
+      title: 'Rodagem Regenerativa',
+      scheduledDate: currentDate.toISOString().split('T')[0],
+      targetDistance: '4km',
+      targetDistanceNum: 4,
+      targetDuration: '30min',
+      targetDurationNum: 30,
+      warmup: '5min: Caminhada vigorosa.',
+      main: '25min: Corrida contínua em Z2 (Confortável). Mantenha pace de 6:30-7:00 min/km. O objetivo é volume, não velocidade.',
+      cooldown: 'Alongamento estático leve.',
+      status: 'pending'
+    });
+
+    // Move to Friday (Fartlek)
+    currentDate.setDate(currentDate.getDate() + 2);
+    schedule.push({
+      id: `run_week${week}_3`,
+      type: 'FARTLEK',
+      title: 'Fartlek Dinâmico',
+      scheduledDate: currentDate.toISOString().split('T')[0],
+      targetDistance: '5km',
+      targetDistanceNum: 5,
+      targetDuration: '35min',
+      targetDurationNum: 35,
+      warmup: '5min Trote leve.',
+      main: '25min: Brincadeira de velocidade. Alterne livremente: Corra forte até a próxima esquina, trote até o poste. Mínimo de 6 estímulos fortes durante o trajeto.',
+      cooldown: '5min Caminhada.',
+      status: 'pending'
+    });
+
+     // Move to Sunday (Ritmo)
+     currentDate.setDate(currentDate.getDate() + 2);
+     schedule.push({
+       id: `run_week${week}_4`,
+       type: 'RITMO',
+       title: 'Tempo Run (Ritmo)',
+       scheduledDate: currentDate.toISOString().split('T')[0],
+       targetDistance: '5km',
+       targetDistanceNum: 5,
+       targetDuration: '30min',
+       targetDurationNum: 30,
+       warmup: '5min Trote.',
+       main: '20min: Ritmo sustentado "confortavelmente difícil" (Z3). Tente segurar 10-11km/h constantes sem oscilar.',
+       cooldown: '5min Trote regenerativo.',
+       status: 'pending'
+     });
+
+     // Reset to next Monday
+     currentDate.setDate(currentDate.getDate() + 1);
+  }
+  return schedule;
+};
+
 export const getStudents = (): Student[] => {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return [];
   
   const students: Student[] = JSON.parse(saved);
   
-  // Data migration for existing students to ensure structure exists
   return students.map(s => ({
     ...s,
     goals: s.goals || [],
@@ -44,32 +122,11 @@ export const initData = () => {
         email: 'britodeandrade@gmail.com', 
         sexo: 'Masculino', 
         nascimento: '1990-01-01', 
-        photoUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop', // Placeholder pro André
+        photoUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop',
         avaliacoes: [], 
         goals: [], 
         achievements: [],
-        runningWorkouts: [
-          {
-            id: 'run1',
-            title: 'Rodagem Leve',
-            targetDuration: '40min',
-            targetDistance: '5km',
-            warmup: '10min caminhada rápida + 5min trote leve.',
-            main: '20min corrida contínua em Z2 (Ritmo confortável). Foco na respiração.',
-            cooldown: '5min caminhada para baixar a frequência cardíaca.',
-            status: 'pending'
-          },
-          {
-            id: 'run2',
-            title: 'Tiro de Velocidade',
-            targetDuration: '30min',
-            targetDistance: '4km',
-            warmup: '15min trote leve.',
-            main: '10x tiros de 1min forte (Z4) com 1min de descanso (caminhada).',
-            cooldown: '5min trote muito leve.',
-            status: 'pending'
-          }
-        ], 
+        runningWorkouts: generateRunningSchedule(), 
         workouts: [
           {
             id: 'treino-a-andre',
@@ -132,10 +189,8 @@ export const initData = () => {
 
 export const checkAchievements = (student: Student): Student => {
   let updated = false;
-  // Deep copy to avoid mutating state directly before saving
   const newAchievements = student.achievements.map(a => ({...a}));
 
-  // Logic: First Assessment
   if (student.avaliacoes.length > 0) {
     const achIndex = newAchievements.findIndex(a => a.id === 'first_assessment');
     if (achIndex !== -1 && !newAchievements[achIndex].unlocked) {
@@ -145,7 +200,6 @@ export const checkAchievements = (student: Student): Student => {
     }
   }
 
-  // Logic: First Goal Completed
   const completedGoals = student.goals.filter(g => g.completed).length;
   if (completedGoals >= 1) {
     const achIndex = newAchievements.findIndex(a => a.id === 'first_goal');
@@ -156,7 +210,6 @@ export const checkAchievements = (student: Student): Student => {
     }
   }
 
-  // Logic: 5 Goals Completed
   if (completedGoals >= 5) {
     const achIndex = newAchievements.findIndex(a => a.id === 'consistency_king');
     if (achIndex !== -1 && !newAchievements[achIndex].unlocked) {
@@ -166,7 +219,6 @@ export const checkAchievements = (student: Student): Student => {
     }
   }
 
-   // Logic: 3 Active Goals
    const activeGoals = student.goals.filter(g => !g.completed).length;
    if (activeGoals >= 3) {
      const achIndex = newAchievements.findIndex(a => a.id === 'star_student');

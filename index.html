@@ -157,8 +157,8 @@
 <body class="overscroll-none bg-black">
     <div id="root"></div>
     
-    <!-- Entry point for React - Changed to main.tsx as requested -->
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- Entry point for React - Fixed path to be relative to root -->
+    <script type="module" src="/main.tsx"></script>
 
     <script>
        if ('serviceWorker' in navigator) {

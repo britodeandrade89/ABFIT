@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, ViewState, Student } from '../types';
-import { getStudents } from '../services/storageService';
-import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, Home, Target, MessageCircle, PlayCircle } from 'lucide-react';
+import { LogOut, Dumbbell, Activity, CalendarDays, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, PlayCircle } from 'lucide-react';
 import StudentWorkoutsScreen from './StudentWorkoutsScreen';
 import GoalsAchievementsScreen from './GoalsAchievementsScreen';
 import AIChatScreen from './AIChatScreen';
@@ -85,7 +84,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
   };
 
   const renderHome = () => (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn pb-10">
       {/* HEADER */}
       <header className="px-6 pt-6 pb-2 flex justify-between items-center">
         <div>
@@ -129,7 +128,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
       </div>
 
       {/* ACTION GRID - SPECIFIC WORKOUTS */}
-      <div className="px-4 mb-8">
+      <div className="px-4 mb-6">
         <div className="mb-4">
            <h3 className="text-sm font-black text-white italic uppercase tracking-wider mb-3 pl-2 border-l-4 border-red-600">Meus Treinos</h3>
            <div className="grid grid-cols-2 gap-3">
@@ -171,25 +170,66 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
            </div>
         </div>
 
-        {/* Other Shortcuts */}
-        <div className="grid grid-cols-4 gap-3">
-             <button 
-                onClick={() => onNavigate('ASSESSMENT_VIEW')}
-                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-24 active:scale-95 transition-transform"
-             >
-                <ClipboardList className="w-8 h-8 text-pink-500" />
-                <span className="text-[10px] font-bold uppercase text-zinc-300">Minha Avaliação</span>
-             </button>
+        {/* MENU RÁPIDO - CARDS */}
+        <div>
+             <h3 className="text-sm font-black text-white italic uppercase tracking-wider mb-3 pl-2 border-l-4 border-zinc-700">Menu Rápido</h3>
+             <div className="grid grid-cols-2 gap-3">
+                 {/* Goals */}
+                 <button 
+                    onClick={() => setActiveTab('GOALS')} 
+                    className="bg-zinc-900/50 border border-zinc-800 hover:border-yellow-600/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
+                 >
+                    <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-black transition-colors">
+                        <CalendarDays className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <span className="text-lg font-bold text-white block">Metas</span>
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Acompanhar</span>
+                    </div>
+                 </button>
 
-             {/* Shortcuts */}
-             <button onClick={() => onNavigate('RUNNING_WORKOUTS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24 active:scale-95 transition-transform">
-                <Activity className="w-6 h-6 text-orange-500" />
-                <span className="text-[9px] font-bold uppercase text-zinc-300">Corrida</span>
-             </button>
-             <button onClick={() => setActiveTab('GOALS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24 active:scale-95 transition-transform">
-                <CalendarDays className="w-6 h-6 text-yellow-500" />
-                <span className="text-[9px] font-bold uppercase text-zinc-300">Metas</span>
-             </button>
+                 {/* Coach AI */}
+                 <button 
+                    onClick={() => setActiveTab('COACH')} 
+                    className="bg-zinc-900/50 border border-zinc-800 hover:border-red-600/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
+                 >
+                    <div className="w-10 h-10 rounded-lg bg-red-600/10 flex items-center justify-center text-red-500 group-hover:bg-red-600 group-hover:text-white transition-colors">
+                        <Brain className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <span className="text-lg font-bold text-white block">Coach IA</span>
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Tirar Dúvidas</span>
+                    </div>
+                 </button>
+
+                 {/* Assessment */}
+                 <button 
+                    onClick={() => onNavigate('ASSESSMENT_VIEW')}
+                    className="bg-zinc-900/50 border border-zinc-800 hover:border-pink-600/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
+                 >
+                    <div className="w-10 h-10 rounded-lg bg-pink-600/10 flex items-center justify-center text-pink-500 group-hover:bg-pink-600 group-hover:text-white transition-colors">
+                        <ClipboardList className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <span className="text-lg font-bold text-white block">Avaliação</span>
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Resultados</span>
+                    </div>
+                 </button>
+
+                 {/* Running */}
+                 <button 
+                    onClick={() => onNavigate('RUNNING_WORKOUTS')} 
+                    className="bg-zinc-900/50 border border-zinc-800 hover:border-orange-500/50 rounded-2xl p-4 flex flex-col items-start justify-between h-28 active:scale-95 transition-all group"
+                 >
+                    <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                        <Activity className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <span className="text-lg font-bold text-white block">Corrida</span>
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wide">Planilha</span>
+                    </div>
+                 </button>
+             </div>
         </div>
       </div>
 
@@ -214,7 +254,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
       </div>
 
       {/* HISTORY SECTION */}
-      <div className="px-6 pb-24">
+      <div className="px-6 pb-6">
          <h3 className="text-lg font-bold text-white mb-4">Histórico Recente</h3>
          <div className="space-y-3">
              {(!studentData?.history || studentData.history.length === 0) ? (
@@ -251,7 +291,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
     <div className="min-h-screen bg-gradient-to-b from-[#1a0505] to-black text-white">
       
       {/* Content Area */}
-      <main className="pb-20">
+      <main className="pb-6">
         {activeTab === 'HOME' && renderHome()}
         
         {activeTab === 'WORKOUTS' && (
@@ -286,42 +326,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
         )}
       </main>
 
-      {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 w-full bg-black/90 backdrop-blur-xl border-t border-zinc-800 pb-safe z-50">
-        <div className="grid grid-cols-4 h-16 max-w-md mx-auto">
-          <button 
-            onClick={() => setActiveTab('HOME')}
-            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'HOME' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
-            <Home className="w-5 h-5" strokeWidth={activeTab === 'HOME' ? 3 : 2} />
-            <span className="text-[10px] font-bold uppercase tracking-wide">Início</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('WORKOUTS')}
-            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'WORKOUTS' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
-            <Dumbbell className="w-5 h-5" strokeWidth={activeTab === 'WORKOUTS' ? 3 : 2} />
-            <span className="text-[10px] font-bold uppercase tracking-wide">Treinos</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('GOALS')}
-            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'GOALS' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
-            <Target className="w-5 h-5" strokeWidth={activeTab === 'GOALS' ? 3 : 2} />
-            <span className="text-[10px] font-bold uppercase tracking-wide">Metas</span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('COACH')}
-            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'COACH' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
-          >
-            <Brain className="w-5 h-5" strokeWidth={activeTab === 'COACH' ? 3 : 2} />
-            <span className="text-[10px] font-bold uppercase tracking-wide">Coach</span>
-          </button>
-        </div>
-      </div>
+      {/* REMOVED BOTTOM NAVIGATION BAR */}
 
     </div>
   );
