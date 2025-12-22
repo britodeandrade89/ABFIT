@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Student } from '../types';
 import { ArrowLeft, Play, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
@@ -150,8 +151,8 @@ const StudentWorkoutsScreen: React.FC<StudentWorkoutsScreenProps> = ({
                 const completedCount = progress[exercise.id]?.length || 0;
                 const isComplete = completedCount >= totalSets;
                 
-                // Placeholder image based on index/random to match visual
-                const thumbUrl = `https://source.unsplash.com/random/100x100/?gym,fitness,${index}`;
+                // Fixed image to ensure loading
+                const thumbUrl = `https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=100&auto=format&fit=crop`;
 
                 return (
                     <div key={exercise.id} className="bg-[#e5e5e5] rounded-lg shadow-md overflow-hidden relative">

@@ -4,7 +4,7 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox
 if (workbox) {
   console.log(`Workbox is loaded`);
 
-  const CACHE_VERSION = 'v16'; // Version bump to force update
+  const CACHE_VERSION = 'v18'; // Version bump to force update and fix black screen issues
   const OFFLINE_FALLBACK_PAGE = 'offline.html';
 
   // Define versioned cache names
