@@ -166,33 +166,7 @@
     <div id="root"></div>
     
     <!-- Entry point for React -->
-    <script type="module" src="main.tsx"></script>
+    <script type="module" src="/main.tsx"></script>
 
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // Utiliza ./service-worker.js para garantir compatibilidade com subdiretórios e ambientes de dev
-          navigator.serviceWorker.register('./service-worker.js')
-            .then(registration => {
-              console.log('SW registrado (Produção):', registration);
-              
-               // Lógica opcional de atualização, mantida mas protegida
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    console.log('Nova versão detectada. Recarregando...');
-                    window.location.reload(); 
-                  }
-                });
-              });
-            })
-            .catch(error => {
-              // Este catch impede que o erro trave a tela preta no AI Studio ou ambientes sem HTTPS/SW
-              console.warn('Service Worker não registrado (Normal em Desenvolvimento/AI Studio):', error);
-            });
-        });
-      }
-    </script>
 </body>
 </html>
