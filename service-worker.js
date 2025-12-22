@@ -4,7 +4,7 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox
 if (workbox) {
   console.log(`Workbox is loaded`);
 
-  const CACHE_VERSION = 'v14'; // Incremented version to force update
+  const CACHE_VERSION = 'v15'; // Incremented version to force update
   const OFFLINE_FALLBACK_PAGE = 'offline.html';
 
   // Define versioned cache names
