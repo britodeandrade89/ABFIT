@@ -180,5 +180,6 @@ export const ProfessorDashboard: React.FC<ProfessorDashboardProps> = ({
           </div>
         )}
       </div>
-    );
+    </div>
+  );
 };
