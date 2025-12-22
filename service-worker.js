@@ -4,7 +4,7 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox
 if (workbox) {
   console.log(`Workbox is loaded`);
 
-  const CACHE_VERSION = 'v15'; // Incremented version to force update
+  const CACHE_VERSION = 'v16'; // Version bump to force update
   const OFFLINE_FALLBACK_PAGE = 'offline.html';
 
   // Define versioned cache names
@@ -13,11 +13,11 @@ if (workbox) {
   const ASSET_CACHE_NAME = `abfit-assets-${CACHE_VERSION}`;
   const IMAGE_CACHE_NAME = `abfit-images-${CACHE_VERSION}`;
   const WEATHER_CACHE_NAME = `abfit-weather-${CACHE_VERSION}`;
-
+  const LIB_CACHE_NAME = `abfit-libs-${CACHE_VERSION}`; // New cache for libraries
 
   // --- Installation: Take control immediately ---
   self.addEventListener('install', (event) => {
-    self.skipWaiting(); // Force the new service worker to become active immediately.
+    self.skipWaiting();
     event.waitUntil(
       caches.open(FALLBACK_CACHE_NAME).then((cache) => {
         console.log('[Service Worker] Caching offline fallback page');
@@ -26,80 +26,111 @@ if (workbox) {
     );
   });
 
-  // --- Activation: Clean up old caches and take control of clients ---
+  // --- Activation: Clean up old caches ---
   self.addEventListener('activate', event => {
     event.waitUntil(
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
-            // If the cache is from this app but doesn't have the current version string, delete it.
             if (cacheName.startsWith('abfit-') && !cacheName.endsWith(CACHE_VERSION)) {
               console.log('[Service Worker] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
-      }).then(() => self.clients.claim()) // Take control of all open clients.
+      }).then(() => self.clients.claim())
     );
   });
 
-  // Enable navigation preload if supported
+  // Enable navigation preload
   if (workbox.navigationPreload.isSupported()) {
     workbox.navigationPreload.enable();
   }
 
-  // --- Precaching App Shell (Manifest & Icons only) ---
-  // Must match manifest.json EXACTLY to avoid 404s during install
+  // --- Precache App Shell ---
   workbox.precaching.precacheAndRoute([
-    { url: '/manifest.json', revision: null },
+    { url: '/manifest.json', revision: CACHE_VERSION },
     { url: 'https://placehold.co/192x192/991b1b/FFFFFF/png?text=AB', revision: null },
     { url: 'https://placehold.co/512x512/991b1b/FFFFFF/png?text=AB', revision: null },
   ]);
 
-  // --- Caching Strategies for Dynamic Requests ---
+  // --- Caching Strategies ---
 
-  // 1. Navigation (HTML pages) - Network First, falling back to offline page
-  const networkFirstWithOfflineFallback = new workbox.strategies.NetworkFirst({
-      cacheName: HTML_CACHE_NAME,
+  // 1. External Libraries (esm.sh, tailwind, etc.) - StaleWhileRevalidate
+  // Critical for startup speed. Serve from cache if available, update in background.
+  workbox.routing.registerRoute(
+    ({ url }) => 
+      url.origin === 'https://esm.sh' || 
+      url.origin === 'https://cdn.tailwindcss.com' ||
+      url.origin === 'https://fonts.googleapis.com' ||
+      url.origin === 'https://fonts.gstatic.com' ||
+      url.origin === 'https://unpkg.com',
+    new workbox.strategies.StaleWhileRevalidate({
+      cacheName: LIB_CACHE_NAME,
       plugins: [
-          new workbox.cacheableResponse.Plugin({
-              statuses: [0, 200], // Cache opaque responses for cross-origin resources
-          }),
+        new workbox.cacheableResponse.Plugin({
+          statuses: [0, 200],
+        }),
+        new workbox.expiration.Plugin({
+          maxEntries: 50,
+          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 Year
+        }),
       ],
-  });
+    })
+  );
 
+  // 2. Navigation (HTML) - Network First
   workbox.routing.registerRoute(
     ({ request }) => request.mode === 'navigate',
     async (args) => {
         try {
-            // Use the preloaded response, if available
             const preloadResponse = await args.event.preloadResponse;
-            if (preloadResponse) {
-                return preloadResponse;
-            }
-            return await networkFirstWithOfflineFallback.handle(args);
+            if (preloadResponse) return preloadResponse;
+            
+            const networkFirst = new workbox.strategies.NetworkFirst({
+                cacheName: HTML_CACHE_NAME,
+                plugins: [new workbox.cacheableResponse.Plugin({ statuses: [0, 200] })],
+            });
+            return await networkFirst.handle(args);
         } catch (error) {
-            console.log('[Service Worker] Fetch failed for navigation; returning offline page.');
+            console.log('[Service Worker] Navigation fetch failed, returning offline page.');
             const cache = await caches.open(FALLBACK_CACHE_NAME);
             return cache.match(OFFLINE_FALLBACK_PAGE);
         }
     }
   );
 
-  // 2. CSS, JS, Workers - Network First
-  // Prioritize getting the latest app logic and styles. Fallback to cache if offline.
+  // 3. App Code (.tsx, .ts, .js, .json) - Network First
+  // Ensures we always get the latest code updates, but works offline.
   workbox.routing.registerRoute(
-    ({ request }) =>
-      request.destination === 'style' ||
-      request.destination === 'script' ||
-      request.destination === 'worker',
+    ({ url, request }) => 
+      url.origin === self.location.origin && (
+        url.pathname.endsWith('.tsx') || 
+        url.pathname.endsWith('.ts') || 
+        url.pathname.endsWith('.js') || 
+        url.pathname.endsWith('.json') ||
+        request.destination === 'script' ||
+        request.destination === 'worker'
+      ),
+    new workbox.strategies.NetworkFirst({
+      cacheName: ASSET_CACHE_NAME,
+      plugins: [
+        new workbox.cacheableResponse.Plugin({
+          statuses: [0, 200],
+        }),
+      ],
+    })
+  );
+
+  // 4. Styles - Network First
+  workbox.routing.registerRoute(
+    ({ request }) => request.destination === 'style',
     new workbox.strategies.NetworkFirst({
       cacheName: ASSET_CACHE_NAME,
     })
   );
 
-  // 3. Images - Cache First
-  // Images don't change often, so serve from cache for speed.
+  // 5. Images - Cache First
   workbox.routing.registerRoute(
     ({ request }) => request.destination === 'image',
     new workbox.strategies.CacheFirst({
@@ -113,51 +144,22 @@ if (workbox) {
     })
   );
 
-  // 4. Weather API - Custom handler with fallback to prevent fetch errors.
-  const weatherApiHandler = async (args) => {
-    const staleWhileRevalidate = new workbox.strategies.StaleWhileRevalidate({
-        cacheName: WEATHER_CACHE_NAME,
-        plugins: [
-            new workbox.cacheableResponse.Plugin({
-                statuses: [0, 200], // Cache successful and opaque responses
-            }),
-            new workbox.expiration.Plugin({
-                maxEntries: 10,
-                maxAgeSeconds: 1 * 60 * 60, // 1 hour cache duration
-            }),
-        ],
-    });
-
-    try {
-        return await staleWhileRevalidate.handle(args);
-    } catch (error) {
-        console.warn('[Service Worker] Weather API fetch failed, returning fallback response.', error);
-        const fallbackResponse = {
-            current: {
-                temperature_2m: 24, // A sensible default temperature
-                weather_code: 1,    // Represents "clear sky"
-            },
-            daily: {
-                temperature_2m_max: [28],
-                temperature_2m_min: [22],
-            },
-        };
-        return new Response(JSON.stringify(fallbackResponse), {
-            headers: { 'Content-Type': 'application/json' },
-        });
-    }
-  };
-
+  // 6. Weather API
   workbox.routing.registerRoute(
       ({url}) => url.hostname === 'api.open-meteo.com',
-      weatherApiHandler
+      new workbox.strategies.StaleWhileRevalidate({
+          cacheName: WEATHER_CACHE_NAME,
+          plugins: [
+              new workbox.cacheableResponse.Plugin({ statuses: [0, 200] }),
+              new workbox.expiration.Plugin({ maxEntries: 1, maxAgeSeconds: 3600 }),
+          ]
+      })
   );
 
 } else {
   console.log(`Workbox didn't load`);
 }
 
-// Listener to immediately activate the new service worker
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();

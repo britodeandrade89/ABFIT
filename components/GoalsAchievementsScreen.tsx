@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Student, Goal, Achievement } from '../types';
 import { ArrowLeft, Plus, Trophy, Target, Medal, Zap, Crown, Star, CheckCircle, Trash2, Minus, Share2 } from 'lucide-react';
@@ -200,7 +201,7 @@ const GoalsAchievementsScreen: React.FC<GoalsAchievementsScreenProps> = ({
                    
                    <div className="flex items-center gap-2">
                      {goal.completed && (
-                       <div className="mr-1 text-green-500 animate-fadeIn">
+                       <div className="mr-1 text-green-500 animate-bounceIn">
                          <CheckCircle className="w-5 h-5" />
                        </div>
                      )}
