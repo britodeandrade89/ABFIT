@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, ViewState, Student } from '../types';
 import { getStudents } from '../services/storageService';
-import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, Home, Target, MessageCircle } from 'lucide-react';
+import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, Home, Target, MessageCircle, PlayCircle } from 'lucide-react';
 import StudentWorkoutsScreen from './StudentWorkoutsScreen';
 import GoalsAchievementsScreen from './GoalsAchievementsScreen';
 import AIChatScreen from './AIChatScreen';
@@ -19,6 +19,7 @@ type TabState = 'HOME' | 'WORKOUTS' | 'GOALS' | 'COACH';
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onUpdateStudents, onLogout, onNavigate }) => {
   const [activeTab, setActiveTab] = useState<TabState>('HOME');
   const [weather, setWeather] = useState<{temp: number, city: string} | null>(null);
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
   
   // Calendar State (Only used in Home Tab)
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -78,6 +79,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
     return grid;
   };
 
+  const handleWorkoutClick = (workoutId: string) => {
+    setSelectedWorkoutId(workoutId);
+    setActiveTab('WORKOUTS');
+  };
+
   const renderHome = () => (
     <div className="animate-fadeIn">
       {/* HEADER */}
@@ -122,41 +128,58 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
         </div>
       </div>
 
-      {/* ACTION GRID (Simplified for Home) */}
+      {/* ACTION GRID - SPECIFIC WORKOUTS */}
       <div className="px-4 mb-8">
+        <div className="mb-4">
+           <h3 className="text-sm font-black text-white italic uppercase tracking-wider mb-3 pl-2 border-l-4 border-red-600">Meus Treinos</h3>
+           <div className="flex flex-col gap-3">
+              {studentData?.workouts && studentData.workouts.length > 0 ? (
+                studentData.workouts.map((workout, index) => (
+                    <button 
+                        key={workout.id}
+                        onClick={() => handleWorkoutClick(workout.id)}
+                        className="group w-full bg-gradient-to-r from-zinc-900 to-black border border-zinc-800 rounded-2xl p-5 flex items-center justify-between hover:border-red-600/50 transition-all shadow-lg active:scale-[0.98]"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-red-900/20 flex items-center justify-center border border-red-900/30 group-hover:bg-red-600 group-hover:text-white text-red-600 transition-colors">
+                                <Dumbbell className="w-6 h-6" />
+                            </div>
+                            <div className="text-left">
+                                <h4 className="text-lg font-black text-white italic uppercase">{workout.title}</h4>
+                                <p className="text-xs text-zinc-500 font-medium">{workout.description || `${workout.exercises.length} exercícios`}</p>
+                            </div>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
+                            <PlayCircle className="w-5 h-5" />
+                        </div>
+                    </button>
+                ))
+              ) : (
+                <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 text-center">
+                    <p className="text-zinc-500 text-sm">Nenhum treino atribuído ainda.</p>
+                </div>
+              )}
+           </div>
+        </div>
+
+        {/* Other Shortcuts */}
         <div className="grid grid-cols-4 gap-3">
              <button 
-                onClick={() => setActiveTab('WORKOUTS')}
-                className="col-span-2 bg-black border border-red-600/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-red-900/10 transition-colors shadow-lg shadow-red-900/10 h-32"
-             >
-                <Dumbbell className="w-8 h-8 text-red-600" />
-                <span className="text-xs font-bold uppercase tracking-wider text-white">Ir para Treino</span>
-             </button>
-
-             <button 
                 onClick={() => onNavigate('ASSESSMENT_VIEW')}
-                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-32"
+                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-24 active:scale-95 transition-transform"
              >
                 <ClipboardList className="w-8 h-8 text-pink-500" />
                 <span className="text-[10px] font-bold uppercase text-zinc-300">Minha Avaliação</span>
              </button>
 
              {/* Shortcuts */}
-             <button onClick={() => onNavigate('RUNNING_WORKOUTS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => onNavigate('RUNNING_WORKOUTS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24 active:scale-95 transition-transform">
                 <Activity className="w-6 h-6 text-orange-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Corrida</span>
              </button>
-             <button onClick={() => setActiveTab('GOALS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => setActiveTab('GOALS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24 active:scale-95 transition-transform">
                 <CalendarDays className="w-6 h-6 text-yellow-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Metas</span>
-             </button>
-             <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
-                <Map className="w-6 h-6 text-green-500" />
-                <span className="text-[9px] font-bold uppercase text-zinc-300">Outdoor</span>
-             </button>
-             <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
-                <Flag className="w-6 h-6 text-blue-500" />
-                <span className="text-[9px] font-bold uppercase text-zinc-300">Provas</span>
              </button>
         </div>
       </div>
@@ -227,6 +250,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
             <StudentWorkoutsScreen 
               studentId={user.studentId} 
               students={students} 
+              initialWorkoutId={selectedWorkoutId}
               onBack={() => setActiveTab('HOME')} 
             />
           </div>

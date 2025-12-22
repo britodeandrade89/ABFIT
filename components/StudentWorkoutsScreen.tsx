@@ -5,24 +5,36 @@ import { ArrowLeft, Play, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide
 interface StudentWorkoutsScreenProps {
   studentId?: string;
   students: Student[];
+  initialWorkoutId?: string | null;
   onBack: () => void;
 }
 
 const StudentWorkoutsScreen: React.FC<StudentWorkoutsScreenProps> = ({
   studentId,
   students,
+  initialWorkoutId,
   onBack
 }) => {
   const student = students.find(s => s.id === studentId);
   const workouts = student?.workouts || [];
-  const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(workouts.length > 0 ? workouts[0].id : null);
+  
+  // Initialize with passed ID or first workout
+  const [activeWorkoutId, setActiveWorkoutId] = useState<string | null>(
+    initialWorkoutId || (workouts.length > 0 ? workouts[0].id : null)
+  );
+
+  // If prop changes (e.g. returning to this view with a different selection), update state
+  useEffect(() => {
+    if (initialWorkoutId) {
+      setActiveWorkoutId(initialWorkoutId);
+    }
+  }, [initialWorkoutId]);
   
   // Stopwatch State
   const [time, setTime] = useState(0);
   const [isActive, setIsActive] = useState(true);
 
   // Exercise Progress State: { [exerciseId]: [set1Done, set2Done, set3Done] }
-  // We store array of booleans. If index is present, it's done.
   const [progress, setProgress] = useState<Record<string, number[]>>({});
 
   useEffect(() => {

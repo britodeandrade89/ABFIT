@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Student, Goal } from '../types';
-import { ArrowLeft, Plus, Trophy, Target, Medal, Zap, Crown, Star, CheckCircle, Trash2, Minus } from 'lucide-react';
+import { Student, Goal, Achievement } from '../types';
+import { ArrowLeft, Plus, Trophy, Target, Medal, Zap, Crown, Star, CheckCircle, Trash2, Minus, Share2 } from 'lucide-react';
 
 interface GoalsAchievementsScreenProps {
   studentId?: string;
@@ -64,6 +64,25 @@ const GoalsAchievementsScreen: React.FC<GoalsAchievementsScreenProps> = ({
     const updatedStudent = { ...student, goals: updatedGoals };
     const updatedStudents = students.map(s => s.id === studentId ? updatedStudent : s);
     onUpdateStudents(updatedStudents);
+  };
+
+  const handleShare = async (ach: Achievement) => {
+    const text = `🏆 Conquista Desbloqueada na ABFIT: ${ach.title} - ${ach.description} #ABFIT #TreinoSerio`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Nova Conquista ABFIT',
+          text: text,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.log('Error sharing', err);
+      }
+    } else {
+      navigator.clipboard.writeText(text);
+      alert('Texto copiado para compartilhar!');
+    }
   };
 
   const getIcon = (iconName: string) => {
@@ -215,9 +234,18 @@ const GoalsAchievementsScreen: React.FC<GoalsAchievementsScreenProps> = ({
                   {getIcon(ach.icon)}
                 </div>
                 
-                <div className="relative z-10">
+                <div className="relative z-10 w-full">
                   <h4 className={`text-sm font-bold leading-tight mb-1 ${ach.unlocked ? 'text-white' : 'text-zinc-500'}`}>{ach.title}</h4>
-                  <p className="text-[10px] text-zinc-500 leading-tight">{ach.description}</p>
+                  <p className="text-[10px] text-zinc-500 leading-tight mb-3 min-h-[2.5em]">{ach.description}</p>
+                  
+                  {ach.unlocked && (
+                     <button 
+                        onClick={() => handleShare(ach)}
+                        className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg flex items-center justify-center gap-2 text-[10px] font-bold text-yellow-500 uppercase tracking-widest transition-colors"
+                     >
+                        <Share2 className="w-3 h-3" /> Compartilhar
+                     </button>
+                  )}
                 </div>
 
                 {ach.unlocked && (
