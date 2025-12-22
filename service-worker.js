@@ -4,7 +4,7 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox
 if (workbox) {
   console.log(`Workbox is loaded`);
 
-  const CACHE_VERSION = 'v13'; // Central version for all caches. Increment to force update.
+  const CACHE_VERSION = 'v14'; // Incremented version to force update
   const OFFLINE_FALLBACK_PAGE = 'offline.html';
 
   // Define versioned cache names
@@ -49,11 +49,11 @@ if (workbox) {
   }
 
   // --- Precaching App Shell (Manifest & Icons only) ---
-  // Core app files (HTML, JS, CSS) are handled by runtime caching rules below.
+  // Must match manifest.json EXACTLY to avoid 404s during install
   workbox.precaching.precacheAndRoute([
     { url: '/manifest.json', revision: null },
-    { url: 'https://via.placeholder.com/192x192/991b1b/FFFFFF?text=AB', revision: null },
-    { url: 'https://via.placeholder.com/512x512/991b1b/FFFFFF?text=AB', revision: null },
+    { url: 'https://placehold.co/192x192/991b1b/FFFFFF/png?text=AB', revision: null },
+    { url: 'https://placehold.co/512x512/991b1b/FFFFFF/png?text=AB', revision: null },
   ]);
 
   // --- Caching Strategies for Dynamic Requests ---
