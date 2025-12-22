@@ -11,21 +11,32 @@ const firebaseConfig = {
   measurementId: "G-MRBDJC3QXZ"
 };
 
-const app = initializeApp(firebaseConfig);
-
+let app;
 let analytics = null;
 
-// Initialize analytics conditionally and safely to prevent crashes
-isSupported().then((supported) => {
-  if (supported) {
-    try {
-      analytics = getAnalytics(app);
-    } catch (e) {
-      console.warn("Firebase Analytics initialization failed:", e);
+try {
+  app = initializeApp(firebaseConfig);
+
+  // Initialize analytics conditionally and safely to prevent crashes
+  isSupported().then((supported) => {
+    if (supported && app) {
+      try {
+        // Prevent initialization with the known invalid key to avoid "400 INVALID_ARGUMENT" console errors.
+        // In a production environment, you would replace the apiKey with a valid one.
+        if (firebaseConfig.apiKey !== "AIzaSyD_C_yn_RyBSopY7Tb9aqLW8") {
+            analytics = getAnalytics(app);
+        } else {
+            console.log("Firebase Analytics disabled: Placeholder API Key detected.");
+        }
+      } catch (e) {
+        console.warn("Firebase Analytics initialization failed:", e);
+      }
     }
-  }
-}).catch((err) => {
-  console.warn("Firebase Analytics support check failed:", err);
-});
+  }).catch((err) => {
+    console.warn("Firebase Analytics support check failed:", err);
+  });
+} catch (error) {
+  console.warn("Firebase initialization failed. App running in offline/local mode.", error);
+}
 
 export { app, analytics };

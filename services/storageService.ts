@@ -46,7 +46,44 @@ export const initData = () => {
         avaliacoes: [], 
         goals: [], 
         achievements: [], 
-        workouts: [],
+        workouts: [
+          {
+            id: 'treino-a-andre',
+            title: 'Treino A',
+            description: 'Adaptação / Força',
+            exercises: [
+              { id: '1', name: 'Agachamento Livre com HBC', sets: '3', reps: '10', load: '12 kg', rest: '60s' },
+              { id: '2', name: 'Leg Press Horizontal', sets: '3', reps: '10', load: '40 kg', rest: '60s' },
+              { id: '3', name: 'Leg Press Horizontal Unilateral', sets: '3', reps: '10', load: '20 kg', rest: '60s' },
+              { id: '4', name: 'Cadeira Extensora', sets: '3', reps: '10', load: '10 kg', rest: '60s' },
+              { id: '5', name: 'Cadeira Extensora Unilateral', sets: '3', reps: '10', load: '5 kg', rest: '60s' },
+              { id: '6', name: 'Supino Aberto com HBC no Banco Inclinado', sets: '3', reps: '10', load: '12 kg', rest: '60s' },
+              { id: '7', name: 'Crucifixo Aberto com HBC no Banco Inclinado', sets: '3', reps: '10', load: '8 kg', rest: '60s' },
+              { id: '8', name: 'Desenvolvimento Aberto com HBC no Banco 75 Graus', sets: '3', reps: '10', load: '8 kg', rest: '60s' },
+              { id: '9', name: 'Extensão de Cotovelos Aberto no Solo', sets: '3', reps: '10', load: '0 kg', rest: '60s' },
+              { id: '10', name: 'Extensão de Cotovelos Fechado no Solo', sets: '3', reps: '10', load: '0 kg', rest: '60s' },
+              { id: '11', name: 'Abdominal Remador no Solo', sets: '3', reps: '15', load: '0 kg', rest: '60s' }
+            ]
+          },
+          {
+            id: 'treino-b-andre',
+            title: 'Treino B',
+            description: 'Inferior / Dorsal',
+            exercises: [
+              { id: '1', name: 'Agachamento Sumô com HBC', sets: '3', reps: '12', load: '16 kg', rest: '60s' },
+              { id: '2', name: 'Extensão de Quadril com Caneleira', sets: '3', reps: '12', load: '5 kg', rest: '60s' },
+              { id: '3', name: 'Flexão de Joelho em Pé com Caneleira', sets: '3', reps: '12', load: '5 kg', rest: '60s' },
+              { id: '4', name: 'Cadeira Flexora', sets: '3', reps: '12', load: '15 kg', rest: '60s' },
+              { id: '5', name: 'Cadeira Abdutora', sets: '3', reps: '12', load: '20 kg', rest: '60s' },
+              { id: '6', name: 'Remada Declinado no Smith', sets: '3', reps: '12', load: '10 kg', rest: '60s' },
+              { id: '7', name: 'Remada Curvada Supinada no Cross', sets: '3', reps: '12', load: '15 kg', rest: '60s' },
+              { id: '8', name: 'Bíceps em Pé no Cross Barra Reta', sets: '3', reps: '12', load: '10 kg', rest: '60s' },
+              { id: '9', name: 'Puxada Aberta no Pulley Alto', sets: '3', reps: '12', load: '25 kg', rest: '60s' },
+              { id: '10', name: 'Puxada Supinada no Pulley Alto', sets: '3', reps: '12', load: '25 kg', rest: '60s' },
+              { id: '11', name: 'Abdominal Remador no Solo', sets: '3', reps: '15', load: '0 kg', rest: '60s' }
+            ]
+          }
+        ],
         history: [
             { id: 'h1', date: '2025-12-22', workoutTitle: 'Treino A', duration: '54 min', status: 'completed' },
             { id: 'h2', date: '2025-12-10', workoutTitle: 'Treino A', duration: '37 min', status: 'completed' },
