@@ -58,6 +58,8 @@ const App: React.FC = () => {
       {currentView === 'STUDENT_DASHBOARD' && currentUser && (
         <StudentDashboard 
           user={currentUser} 
+          students={students}
+          onUpdateStudents={updateStudents}
           onLogout={handleLogout}
           onNavigate={handleNavigate}
         />
@@ -72,6 +74,13 @@ const App: React.FC = () => {
           onManageWorkouts={(id) => handleNavigate('WORKOUT_MANAGER', id)}
         />
       )}
+
+      {/* 
+        Note: The following views (ASSESSMENT, WORKOUT_MANAGER) are still routed via App.tsx 
+        because they might need full screen context or are shared/deep links.
+        However, standard Student Workouts, Goals, and Chat are now handled internally 
+        by StudentDashboard tabs for a better UX.
+      */}
 
       {currentView === 'ASSESSMENT_VIEW' && (
         <AssessmentView
@@ -98,6 +107,7 @@ const App: React.FC = () => {
         />
       )}
 
+      {/* Fallback routes if needed externally, though Dashboard handles them now */}
       {currentView === 'STUDENT_WORKOUTS' && currentUser?.studentId && (
         <StudentWorkoutsScreen 
           studentId={currentUser.studentId}

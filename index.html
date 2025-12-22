@@ -156,6 +156,7 @@
 <body class="overscroll-none bg-black">
     <div id="root"></div>
     <script>
+      /* Service Worker disabled for Vercel deployment stability
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./service-worker.js')
@@ -167,6 +168,7 @@
             });
         });
       }
+      */
     </script>
 </body>
 </html>

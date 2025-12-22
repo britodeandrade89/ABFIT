@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { User, ViewState, Student } from '../types';
 import { getStudents } from '../services/storageService';
-import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, Home, Target, MessageCircle } from 'lucide-react';
+import StudentWorkoutsScreen from './StudentWorkoutsScreen';
+import GoalsAchievementsScreen from './GoalsAchievementsScreen';
+import AIChatScreen from './AIChatScreen';
 
 interface StudentDashboardProps {
   user: User;
+  students: Student[];
+  onUpdateStudents: (students: Student[]) => void;
   onLogout: () => void;
   onNavigate: (view: ViewState) => void;
 }
 
-const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onNavigate }) => {
+type TabState = 'HOME' | 'WORKOUTS' | 'GOALS' | 'COACH';
+
+const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onUpdateStudents, onLogout, onNavigate }) => {
+  const [activeTab, setActiveTab] = useState<TabState>('HOME');
   const [weather, setWeather] = useState<{temp: number, city: string} | null>(null);
-  const [studentData, setStudentData] = useState<Student | undefined>(undefined);
   
-  // Calendar State
+  // Calendar State (Only used in Home Tab)
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  useEffect(() => {
-    // Fetch Student specific data (history, etc)
-    const students = getStudents();
-    const currentStudent = students.find(s => s.id === user.studentId);
-    setStudentData(currentStudent);
+  const studentData = students.find(s => s.id === user.studentId);
 
+  useEffect(() => {
     // Fetch Weather (Rio de Janeiro hardcoded as per request visual)
     const fetchWeather = async () => {
       try {
@@ -56,7 +60,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onN
         const isToday = day === new Date().getDate() && currentDate.getMonth() === new Date().getMonth();
         const hasHistory = studentData?.history?.some(h => {
              const hDate = new Date(h.date);
-             // Note: timezone offset might trick this simple check in real apps, but works for mock
              return hDate.getDate() === day && hDate.getMonth() === currentDate.getMonth();
         });
 
@@ -75,8 +78,8 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onN
     return grid;
   };
 
-  return (
-    <div className="animate-fadeIn min-h-screen pb-10 bg-gradient-to-b from-[#1a0505] to-black text-white">
+  const renderHome = () => (
+    <div className="animate-fadeIn">
       {/* HEADER */}
       <header className="px-6 pt-6 pb-2 flex justify-between items-center">
         <div>
@@ -119,35 +122,33 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onN
         </div>
       </div>
 
-      {/* ACTION GRID */}
+      {/* ACTION GRID (Simplified for Home) */}
       <div className="px-4 mb-8">
         <div className="grid grid-cols-4 gap-3">
-             {/* Treino A */}
              <button 
-                onClick={() => onNavigate('STUDENT_WORKOUTS')}
+                onClick={() => setActiveTab('WORKOUTS')}
                 className="col-span-2 bg-black border border-red-600/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-red-900/10 transition-colors shadow-lg shadow-red-900/10 h-32"
              >
                 <Dumbbell className="w-8 h-8 text-red-600" />
-                <span className="text-xs font-bold uppercase tracking-wider text-white">Treino A</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-white">Ir para Treino</span>
              </button>
 
-             {/* Treino B */}
              <button 
-                onClick={() => onNavigate('STUDENT_WORKOUTS')}
-                className="col-span-2 bg-black border border-red-600/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-red-900/10 transition-colors shadow-lg shadow-red-900/10 h-32"
+                onClick={() => onNavigate('ASSESSMENT_VIEW')}
+                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-32"
              >
-                <Dumbbell className="w-8 h-8 text-red-600" />
-                <span className="text-xs font-bold uppercase tracking-wider text-white">Treino B</span>
+                <ClipboardList className="w-8 h-8 text-pink-500" />
+                <span className="text-[10px] font-bold uppercase text-zinc-300">Minha Avaliação</span>
              </button>
 
-             {/* Row 2 */}
+             {/* Shortcuts */}
              <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <Activity className="w-6 h-6 text-orange-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Corrida</span>
              </button>
-             <button onClick={() => onNavigate('GOALS_VIEW')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => setActiveTab('GOALS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <CalendarDays className="w-6 h-6 text-yellow-500" />
-                <span className="text-[9px] font-bold uppercase text-zinc-300">Periodização</span>
+                <span className="text-[9px] font-bold uppercase text-zinc-300">Metas</span>
              </button>
              <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <Map className="w-6 h-6 text-green-500" />
@@ -156,23 +157,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onN
              <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <Flag className="w-6 h-6 text-blue-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Provas</span>
-             </button>
-
-             {/* Row 3 - Wider buttons */}
-             <button 
-                onClick={() => onNavigate('ASSESSMENT_VIEW')}
-                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24"
-             >
-                <ClipboardList className="w-6 h-6 text-pink-500" />
-                <span className="text-[10px] font-bold uppercase text-zinc-300">Avaliação</span>
-             </button>
-             <button 
-                onClick={() => onNavigate('AI_CHAT')}
-                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24 relative overflow-hidden group"
-             >
-                <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors"></div>
-                <Brain className="w-6 h-6 text-teal-400" />
-                <span className="text-[10px] font-bold uppercase text-zinc-300">Análise IA</span>
              </button>
         </div>
       </div>
@@ -198,7 +182,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onN
       </div>
 
       {/* HISTORY SECTION */}
-      <div className="px-6 pb-8">
+      <div className="px-6 pb-24">
          <h3 className="text-lg font-bold text-white mb-4">Histórico Recente</h3>
          <div className="space-y-3">
              {(!studentData?.history || studentData.history.length === 0) ? (
@@ -227,6 +211,83 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onN
                  ))
              )}
          </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#1a0505] to-black text-white">
+      
+      {/* Content Area */}
+      <main className="pb-20">
+        {activeTab === 'HOME' && renderHome()}
+        
+        {activeTab === 'WORKOUTS' && (
+          <div className="animate-fadeIn">
+            <StudentWorkoutsScreen 
+              studentId={user.studentId} 
+              students={students} 
+              onBack={() => setActiveTab('HOME')} 
+            />
+          </div>
+        )}
+
+        {activeTab === 'GOALS' && (
+          <div className="animate-fadeIn">
+             <GoalsAchievementsScreen 
+               studentId={user.studentId}
+               students={students}
+               onUpdateStudents={onUpdateStudents}
+               onBack={() => setActiveTab('HOME')}
+             />
+          </div>
+        )}
+
+        {activeTab === 'COACH' && (
+          <div className="animate-fadeIn">
+            <AIChatScreen 
+              userName={user.name} 
+              onBack={() => setActiveTab('HOME')} 
+            />
+          </div>
+        )}
+      </main>
+
+      {/* Bottom Navigation Bar */}
+      <div className="fixed bottom-0 left-0 w-full bg-black/90 backdrop-blur-xl border-t border-zinc-800 pb-safe z-50">
+        <div className="grid grid-cols-4 h-16 max-w-md mx-auto">
+          <button 
+            onClick={() => setActiveTab('HOME')}
+            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'HOME' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+          >
+            <Home className="w-5 h-5" strokeWidth={activeTab === 'HOME' ? 3 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-wide">Início</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('WORKOUTS')}
+            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'WORKOUTS' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+          >
+            <Dumbbell className="w-5 h-5" strokeWidth={activeTab === 'WORKOUTS' ? 3 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-wide">Treinos</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('GOALS')}
+            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'GOALS' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+          >
+            <Target className="w-5 h-5" strokeWidth={activeTab === 'GOALS' ? 3 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-wide">Metas</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('COACH')}
+            className={`flex flex-col items-center justify-center gap-1 ${activeTab === 'COACH' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+          >
+            <Brain className="w-5 h-5" strokeWidth={activeTab === 'COACH' ? 3 : 2} />
+            <span className="text-[10px] font-bold uppercase tracking-wide">Coach</span>
+          </button>
+        </div>
       </div>
 
     </div>
