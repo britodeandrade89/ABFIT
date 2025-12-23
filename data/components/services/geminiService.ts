@@ -14,16 +14,16 @@ Se usar informações da busca, cite as fontes.
 `;
 
 export const initializeChat = async () => {
-  // Use process.env.API_KEY per guidelines
+  // O uso de process.env.API_KEY é obrigatório neste ambiente.
   const apiKey = process.env.API_KEY;
 
   if (!apiKey) {
-    console.error("CRÍTICO: API Key não encontrada (process.env.API_KEY). Verifique seu arquivo .env");
+    console.error("CRÍTICO: API Key não encontrada (process.env.API_KEY).");
     return;
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: apiKey });
     
     chatSession = ai.chats.create({
       model: 'gemini-3-flash-preview',
