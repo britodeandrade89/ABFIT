@@ -14,18 +14,16 @@ Se usar informações da busca, cite as fontes.
 `;
 
 export const initializeChat = async () => {
-  // ACESSO SEGURO À CHAVE:
-  // Acessamos via (window as any).process para evitar "ReferenceError: process is not defined"
-  // que causa a tela preta em navegadores que não têm polyfill automático.
-  const apiKey = (window as any).process?.env?.API_KEY;
+  // Use process.env.API_KEY per guidelines
+  const apiKey = process.env.API_KEY;
 
   if (!apiKey) {
-    console.error("CRÍTICO: API Key não encontrada no window.process.env");
+    console.error("CRÍTICO: API Key não encontrada (process.env.API_KEY). Verifique seu arquivo .env");
     return;
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey: apiKey });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     chatSession = ai.chats.create({
       model: 'gemini-3-flash-preview',
