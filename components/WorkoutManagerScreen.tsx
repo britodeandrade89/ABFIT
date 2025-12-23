@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Student, Workout, Exercise } from '../types';
-import { ArrowLeft, Plus, Save, Trash2, Dumbbell, Brain, Search, PlayCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Save, Trash2, Dumbbell, Brain, Search, PlayCircle, ClipboardList, Copy, ArrowRightCircle } from 'lucide-react';
 import { EXERCISE_DATABASE, ExerciseDefinition } from '../data/exerciseDatabase';
 import { GoogleGenAI } from "@google/genai";
 
@@ -18,6 +18,7 @@ METODOLOGIA: Prática Baseada em Evidências (PBE). Você não segue "bro-scienc
 OBJETIVO: Ajudar o professor a montar treinos periodizados e seguros.
 QUANDO SUGERIR EXERCÍCIOS: Explique biomecanicamente o porquê. Fale sobre volume, intensidade e descanso.
 TOM DE VOZ: Profissional, técnico, mas colega de trabalho. Use termos como "Mestre", "Professor".
+ACESSO À INTERNET: Você tem acesso à busca do Google. Use-a para encontrar variações modernas de exercícios ou estudos recentes se solicitado.
 Responda de forma sucinta para caber num chat lateral.
 `;
 
@@ -40,7 +41,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
   });
 
   // State for Right Panel (Tools)
-  const [activeToolTab, setActiveToolTab] = useState<'DATABASE' | 'AI'>('DATABASE');
+  const [activeToolTab, setActiveToolTab] = useState<'DATABASE' | 'AI' | 'CURRENT'>('DATABASE');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Peitoral');
 
@@ -56,13 +57,15 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
       const w = workouts.find(w => w.id === editingWorkoutId);
       if (w) setCurrentWorkout(w);
     } else {
-      // New workout template
-      setCurrentWorkout({
-        id: Date.now().toString(),
-        title: 'Novo Treino',
-        description: 'Hipertrofia / Força',
-        exercises: []
-      });
+      // New workout template logic handled by select
+      if (currentWorkout.id === '') {
+          setCurrentWorkout({
+            id: Date.now().toString(),
+            title: 'Novo Treino',
+            description: 'Hipertrofia / Força',
+            exercises: []
+          });
+      }
     }
   }, [editingWorkoutId, workouts]);
 
@@ -73,7 +76,9 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
     if (editingWorkoutId) {
       updatedWorkouts = workouts.map(w => w.id === editingWorkoutId ? currentWorkout : w);
     } else {
-      updatedWorkouts = [...workouts, currentWorkout];
+      // Ensure unique ID if it was just a template
+      const newWorkout = { ...currentWorkout, id: currentWorkout.id || Date.now().toString() };
+      updatedWorkouts = [...workouts, newWorkout];
     }
 
     const updatedStudent = { ...student, workouts: updatedWorkouts };
@@ -81,7 +86,14 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
     
     onUpdateStudents(updatedStudents);
     setWorkouts(updatedWorkouts);
-    setEditingWorkoutId(null); // Go back to list
+    setEditingWorkoutId(null); 
+    // Reset to new template
+    setCurrentWorkout({
+        id: Date.now().toString(),
+        title: 'Novo Treino',
+        description: 'Hipertrofia / Força',
+        exercises: []
+    });
     alert('Treino salvo com sucesso!');
   };
 
@@ -99,6 +111,25 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
       ...prev,
       exercises: [...prev.exercises, newExercise]
     }));
+  };
+
+  const handleImportExercise = (ex: Exercise) => {
+      const newExercise = { ...ex, id: Date.now().toString() };
+      setCurrentWorkout(prev => ({
+          ...prev,
+          exercises: [...prev.exercises, newExercise]
+      }));
+  };
+
+  const handleCloneWorkout = (w: Workout) => {
+      if(confirm(`Deseja substituir o treino atual pelo conteúdo de "${w.title}"?`)) {
+          setCurrentWorkout({
+              ...currentWorkout,
+              title: `${w.title} (Cópia)`,
+              description: w.description,
+              exercises: w.exercises.map(ex => ({...ex, id: Math.random().toString()}))
+          });
+      }
   };
 
   const updateExercise = (index: number, field: keyof Exercise, value: string) => {
@@ -120,6 +151,10 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         const updatedStudents = students.map(s => s.id === studentId ? updatedStudent : s);
         onUpdateStudents(updatedStudents);
         setWorkouts(updatedWorkouts);
+        if (editingWorkoutId === workoutId) {
+            setEditingWorkoutId(null);
+            setCurrentWorkout({id: Date.now().toString(), title: 'Novo Treino', description: '', exercises: []});
+        }
     }
   };
 
@@ -131,7 +166,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
     setIsAiLoading(true);
 
     try {
-        const apiKey = process.env.API_KEY;
+        const apiKey = process.env.API_KEY || (window as any).process?.env?.API_KEY;
         if (!apiKey) throw new Error("API Key missing");
         
         const ai = new GoogleGenAI({ apiKey });
@@ -139,15 +174,37 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         const chat = ai.chats.create({
             model: "gemini-3-flash-preview",
             config: {
-                systemInstruction: SYSTEM_INSTRUCTION_TRAINER
+                systemInstruction: SYSTEM_INSTRUCTION_TRAINER,
+                tools: [{ googleSearch: {} }]
             },
             history: chatHistory.map(h => ({ role: h.role, parts: [{ text: h.text }] }))
         });
 
         const result = await chat.sendMessage({ message: userMsg });
-        const response = result.text;
+        let responseText = result.text || "Sem resposta.";
 
-        setChatHistory(prev => [...prev, { role: 'model', text: response }]);
+        // Processamento de Grounding (Fontes)
+        const groundingChunks = result.candidates?.[0]?.groundingMetadata?.groundingChunks;
+        
+        if (groundingChunks && groundingChunks.length > 0) {
+            let sourcesText = "\n\n📚 **Fontes:**\n";
+            const uniqueLinks = new Set<string>();
+            
+            groundingChunks.forEach((chunk: any) => {
+                if (chunk.web?.uri && chunk.web?.title) {
+                    if (!uniqueLinks.has(chunk.web.uri)) {
+                        uniqueLinks.add(chunk.web.uri);
+                        sourcesText += `- [${chunk.web.title}](${chunk.web.uri})\n`;
+                    }
+                }
+            });
+            
+            if (uniqueLinks.size > 0) {
+                responseText += sourcesText;
+            }
+        }
+
+        setChatHistory(prev => [...prev, { role: 'model', text: responseText }]);
     } catch (error) {
         console.error(error);
         setChatHistory(prev => [...prev, { role: 'model', text: "Erro ao conectar com a IA. Verifique sua chave API." }]);
@@ -174,11 +231,11 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         <div className="flex gap-2">
             {workouts.length > 0 && (
                  <select 
-                    className="bg-zinc-800 text-xs text-white p-2 rounded-lg outline-none"
+                    className="bg-zinc-800 text-xs text-white p-2 rounded-lg outline-none max-w-[150px]"
                     onChange={(e) => {
                         if(e.target.value === 'new') {
                             setEditingWorkoutId(null);
-                            setCurrentWorkout({id: Date.now().toString(), title: 'Novo Treino', exercises: []});
+                            setCurrentWorkout({id: Date.now().toString(), title: 'Novo Treino', description: '', exercises: []});
                         } else {
                             setEditingWorkoutId(e.target.value);
                         }
@@ -195,7 +252,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         
         {/* LEFT COLUMN: WORKOUT BUILDER */}
-        <div className="flex-1 overflow-y-auto p-4 border-r border-zinc-800 custom-scrollbar pb-32">
+        <div className="flex-1 overflow-y-auto p-4 border-r border-zinc-800 custom-scrollbar pb-32 bg-[#050505]">
             <div className="max-w-2xl mx-auto space-y-6">
                 
                 {/* Workout Metadata */}
@@ -223,7 +280,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
                         <div className="text-center py-20 border-2 border-dashed border-zinc-800 rounded-xl">
                             <Dumbbell className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
                             <p className="text-zinc-500 text-sm">Seu treino está vazio.</p>
-                            <p className="text-zinc-600 text-xs mt-1">Clique nos exercícios à direita para adicionar.</p>
+                            <p className="text-zinc-600 text-xs mt-1">Selecione exercícios ao lado.</p>
                         </div>
                     ) : (
                         currentWorkout.exercises.map((ex, idx) => (
@@ -286,20 +343,26 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         </div>
 
         {/* RIGHT COLUMN: TOOLS & DATABASE */}
-        <div className="w-full md:w-[400px] flex flex-col bg-[#0a0a0a]">
+        <div className="w-full md:w-[400px] flex flex-col bg-[#0a0a0a] border-l border-zinc-800">
             {/* Tool Tabs */}
             <div className="flex border-b border-zinc-800">
                 <button 
                     onClick={() => setActiveToolTab('DATABASE')}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${activeToolTab === 'DATABASE' ? 'bg-zinc-800 text-white border-b-2 border-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${activeToolTab === 'DATABASE' ? 'bg-zinc-800 text-white border-b-2 border-red-600' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
-                    <Dumbbell className="w-4 h-4" /> Banco de Exercícios
+                    <Dumbbell className="w-3 h-3" /> Banco
+                </button>
+                <button 
+                    onClick={() => setActiveToolTab('CURRENT')}
+                    className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${activeToolTab === 'CURRENT' ? 'bg-zinc-800 text-green-400 border-b-2 border-green-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+                >
+                    <ClipboardList className="w-3 h-3" /> Atuais
                 </button>
                 <button 
                     onClick={() => setActiveToolTab('AI')}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${activeToolTab === 'AI' ? 'bg-zinc-800 text-blue-400 border-b-2 border-blue-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 ${activeToolTab === 'AI' ? 'bg-zinc-800 text-blue-400 border-b-2 border-blue-500' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
-                    <Brain className="w-4 h-4" /> IA Especialista
+                    <Brain className="w-3 h-3" /> IA
                 </button>
             </div>
 
@@ -341,7 +404,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
                                         className="group relative bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 hover:border-red-600 text-left transition-all active:scale-95"
                                     >
                                         <div className="aspect-video w-full bg-zinc-800 relative">
-                                            {/* Representatividade: Imagem do Unsplash */}
+                                            {/* Representatividade: Imagem Gerada Dinamicamente */}
                                             <img src={ex.videoUrl} alt={ex.name} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity">
                                                 <Plus className="w-8 h-8 text-white drop-shadow-lg" />
@@ -357,14 +420,59 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
                     </div>
                 )}
 
+                {/* === CURRENT WORKOUTS TAB === */}
+                {activeToolTab === 'CURRENT' && (
+                    <div className="space-y-4">
+                        <div className="bg-zinc-900/50 p-3 rounded-lg border border-zinc-800 text-xs text-zinc-400 mb-2">
+                            Aqui estão os treinos ativos deste aluno. Use-os para copiar exercícios ou clonar a estrutura.
+                        </div>
+
+                        {workouts.length === 0 ? (
+                            <div className="text-center py-10 text-zinc-600 text-sm">Nenhum treino encontrado.</div>
+                        ) : (
+                            workouts.map(w => (
+                                <div key={w.id} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                                    <div className="p-3 bg-zinc-800/50 flex justify-between items-center">
+                                        <div>
+                                            <h4 className="font-bold text-white text-sm">{w.title}</h4>
+                                            <p className="text-[10px] text-zinc-500">{w.exercises.length} exercícios</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => handleCloneWorkout(w)}
+                                            className="text-[10px] bg-zinc-700 hover:bg-zinc-600 text-white px-2 py-1 rounded flex items-center gap-1"
+                                            title="Usar este treino como base"
+                                        >
+                                            <Copy className="w-3 h-3" /> Clonar
+                                        </button>
+                                    </div>
+                                    <div className="divide-y divide-zinc-800">
+                                        {w.exercises.map((ex, i) => (
+                                            <div key={i} className="p-2 flex justify-between items-center hover:bg-zinc-800/30">
+                                                <span className="text-xs text-zinc-300 truncate w-3/4">{ex.name}</span>
+                                                <button 
+                                                    onClick={() => handleImportExercise(ex)}
+                                                    className="p-1.5 rounded-full bg-green-900/20 text-green-500 hover:bg-green-500 hover:text-white transition-colors"
+                                                    title="Adicionar ao treino atual"
+                                                >
+                                                    <ArrowRightCircle className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+
                 {/* === AI CONSULTANT TAB === */}
                 {activeToolTab === 'AI' && (
                     <div className="flex flex-col h-full">
-                        <div className="flex-1 space-y-3 mb-4">
+                        <div className="flex-1 space-y-3 mb-4 overflow-y-auto custom-scrollbar">
                             {chatHistory.map((msg, i) => (
                                 <div key={i} className={`p-3 rounded-lg text-sm ${msg.role === 'user' ? 'bg-zinc-800 text-white ml-8' : 'bg-blue-900/20 text-blue-100 mr-8 border border-blue-800/30'}`}>
                                     {msg.role === 'model' && <p className="text-[10px] text-blue-400 font-bold uppercase mb-1">Especialista UFRJ</p>}
-                                    <p className="leading-relaxed">{msg.text}</p>
+                                    <p className="leading-relaxed whitespace-pre-line">{msg.text}</p>
                                 </div>
                             ))}
                             {isAiLoading && (

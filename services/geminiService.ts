@@ -9,6 +9,8 @@ Seu tom de voz deve ser motivador, técnico mas acessível, e levemente informal
 Responda dúvidas sobre execução de exercícios, fisiologia, estratégias de dieta (sem prescrever dieta específica, apenas orientações gerais) e periodização.
 Sempre que possível, enalteça a metodologia ABFIT.
 Responda sempre em Português do Brasil.
+Você tem acesso à busca do Google. Use-a sempre que precisar encontrar variações novas de exercícios ou informações científicas atualizadas.
+Se usar informações da busca, cite as fontes.
 `;
 
 export const initializeChat = async () => {
@@ -27,9 +29,10 @@ export const initializeChat = async () => {
       model: 'gemini-3-flash-preview',
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
+        tools: [{ googleSearch: {} }]
       }
     });
-    console.log("IA Conectada com sucesso.");
+    console.log("IA Conectada com sucesso (Mode: Online).");
   } catch (error) {
     console.error("Erro ao inicializar IA:", error);
   }
@@ -51,7 +54,30 @@ export const sendMessage = async (message: string): Promise<string> => {
 
   try {
     const result = await chatSession.sendMessage({ message });
-    return result.text || "Desculpe, não consegui processar sua resposta no momento.";
+    let responseText = result.text || "Desculpe, não consegui processar sua resposta no momento.";
+    
+    // Processamento de Grounding (Fontes)
+    const groundingChunks = result.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    
+    if (groundingChunks && groundingChunks.length > 0) {
+        let sourcesText = "\n\n**Fontes consultadas:**\n";
+        const uniqueLinks = new Set<string>();
+        
+        groundingChunks.forEach((chunk: any) => {
+            if (chunk.web?.uri && chunk.web?.title) {
+                if (!uniqueLinks.has(chunk.web.uri)) {
+                    uniqueLinks.add(chunk.web.uri);
+                    sourcesText += `- [${chunk.web.title}](${chunk.web.uri})\n`;
+                }
+            }
+        });
+        
+        if (uniqueLinks.size > 0) {
+            responseText += sourcesText;
+        }
+    }
+
+    return responseText;
   } catch (error) {
     console.error("Gemini Error:", error);
     return "Ocorreu um erro ao comunicar com a central. Tente novamente em instantes.";
