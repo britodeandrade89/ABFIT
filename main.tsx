@@ -14,3 +14,5 @@ if (rootElement) {
 } else {
   console.error("ERRO CRÍTICO: Elemento 'root' não encontrado no HTML.");
 }
+
+// Forcing new deploy to update dependencies
