@@ -52,7 +52,6 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
       const w = workouts.find(w => w.id === editingWorkoutId);
       if (w) setCurrentWorkout(w);
     } else {
-      // Se não estiver editando, mas o ID estiver vazio, inicializa um novo template
       if (currentWorkout.id === '') {
         setCurrentWorkout({
             id: Date.now().toString(),
@@ -89,8 +88,6 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
       load: '0kg',
       rest: '60s',
       observation: ''
-      // videoUrl removido da interface Exercise para manter compatibilidade com types.ts existentes,
-      // mas a lógica de banco de dados funciona visualmente.
     };
     setCurrentWorkout(prev => ({
       ...prev,
@@ -128,16 +125,14 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
     if (!chatInput.trim()) return;
     const userMsg = chatInput;
     
-    // LIMPA O CAMPO E ADICIONA AO HISTÓRICO
     setChatInput('');
     setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
     setIsAiLoading(true);
 
     try {
-        // Usa process.env.API_KEY para compatibilidade com o setup atual
         const apiKey = process.env.API_KEY;
         
-        // Contexto do treino atual para a IA saber o que está acontecendo
+        // Contexto inteligente do treino atual
         const workoutContext = `
           DADOS DO TREINO ATUAL QUE ESTOU MONTANDO:
           Título: ${currentWorkout.title}
@@ -151,9 +146,9 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         
         const ai = new GoogleGenAI({ apiKey });
         
-        // Usando a API correta do @google/genai (chats.create)
+        // Uso da nova API @google/genai (versão ^0.1.0)
         const chat = ai.chats.create({
-            model: "gemini-3-flash-preview", // Modelo atualizado e otimizado
+            model: "gemini-3-flash-preview",
             config: {
                 systemInstruction: SYSTEM_INSTRUCTION_TRAINER,
             },
@@ -354,7 +349,6 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
                                         className="group relative bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 hover:border-red-600 text-left transition-all active:scale-95"
                                     >
                                         <div className="aspect-video w-full bg-zinc-800 relative">
-                                            {/* Imagem do Exercício */}
                                             <img src={ex.videoUrl} alt={ex.name} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity">
                                                 <Plus className="w-8 h-8 text-white drop-shadow-lg" />
