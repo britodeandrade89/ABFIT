@@ -74,6 +74,11 @@ export interface RunningWorkout {
   feedback?: RunningWorkoutFeedback;
 }
 
+export interface ReminderConfig {
+  enabled: boolean;
+  time: string; // Format "HH:MM"
+}
+
 export interface Student {
   id: string;
   nome: string;
@@ -87,6 +92,7 @@ export interface Student {
   workouts: Workout[];
   runningWorkouts: RunningWorkout[];
   history: WorkoutHistory[];
+  reminderConfig?: ReminderConfig;
 }
 
 export interface User {

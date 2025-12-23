@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, ViewState, Student } from '../types';
-import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, Home, Target } from 'lucide-react';
+import { LogOut, Dumbbell, Activity, CalendarDays, Map, Flag, ClipboardList, Brain, Cloud, ChevronLeft, ChevronRight, CheckCircle2, Home, Target, Bell, BellRing, X, Clock } from 'lucide-react';
 import StudentWorkoutsScreen from './StudentWorkoutsScreen';
 import GoalsAchievementsScreen from './GoalsAchievementsScreen';
 import AIChatScreen from './AIChatScreen';
@@ -19,9 +19,25 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
   const [activeTab, setActiveTab] = useState<TabState>('HOME');
   const [weather, setWeather] = useState<{temp: number, city: string} | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // Reminder State
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [reminderTime, setReminderTime] = useState('');
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [showVisualAlert, setShowVisualAlert] = useState(false);
+  const lastNotificationTime = useRef<string | null>(null);
 
   const studentData = students.find(s => s.id === user.studentId);
 
+  // Initialize reminder state from student data
+  useEffect(() => {
+    if (studentData?.reminderConfig) {
+      setReminderTime(studentData.reminderConfig.time);
+      setReminderEnabled(studentData.reminderConfig.enabled);
+    }
+  }, [studentData]);
+
+  // Weather Fetch
   useEffect(() => {
     const fetchWeather = async () => {
       try {
@@ -38,6 +54,58 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
     };
     fetchWeather();
   }, [user.studentId]);
+
+  // Reminder Logic (Check every minute)
+  useEffect(() => {
+    const checkReminder = () => {
+      if (!reminderEnabled || !reminderTime) return;
+
+      const now = new Date();
+      const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      if (currentHHMM === reminderTime && lastNotificationTime.current !== currentHHMM) {
+        lastNotificationTime.current = currentHHMM;
+        triggerNotification();
+        setShowVisualAlert(true);
+      }
+    };
+
+    const interval = setInterval(checkReminder, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
+  }, [reminderEnabled, reminderTime]);
+
+  const triggerNotification = () => {
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "granted") {
+      new Notification("Hora do Treino! 💪", {
+        body: `Fala ${user.name.split(' ')[0]}! Tudo pronto para o treino de hoje? Vamos buscar o resultado!`,
+        icon: "https://placehold.co/192x192/991b1b/FFFFFF/png?text=AB",
+        tag: "workout-reminder"
+      });
+    }
+  };
+
+  const handleSaveReminder = async () => {
+    if (!studentData) return;
+
+    // Request permission if enabling
+    if (reminderEnabled && "Notification" in window && Notification.permission !== "granted") {
+      await Notification.requestPermission();
+    }
+
+    const updatedStudent = {
+      ...studentData,
+      reminderConfig: {
+        enabled: reminderEnabled,
+        time: reminderTime
+      }
+    };
+
+    const updatedStudents = students.map(s => s.id === studentData.id ? updatedStudent : s);
+    onUpdateStudents(updatedStudents);
+    setShowReminderModal(false);
+  };
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -72,7 +140,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
   };
 
   const renderHome = () => (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn relative">
       <header className="px-6 pt-6 pb-2 flex justify-between items-center">
         <div>
            <h2 className="text-3xl font-black italic tracking-tighter transform -skew-x-6">
@@ -80,13 +148,43 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
            </h2>
            <p className="text-[8px] text-white tracking-[0.2em] uppercase mt-[-4px] ml-1">Assessoria em Treinamentos Físicos</p>
         </div>
-        <button 
-          onClick={onLogout}
-          className="text-zinc-400 hover:text-white transition-colors"
-        >
-          <LogOut className="w-6 h-6" />
-        </button>
+        <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowReminderModal(true)}
+              className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all ${reminderEnabled ? 'bg-zinc-800 text-yellow-500 border-yellow-500/30' : 'bg-transparent text-zinc-500 border-zinc-800'}`}
+            >
+              {reminderEnabled ? <BellRing className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
+            </button>
+            <button 
+              onClick={onLogout}
+              className="text-zinc-400 hover:text-white transition-colors"
+            >
+              <LogOut className="w-6 h-6" />
+            </button>
+        </div>
       </header>
+
+      {/* Visual Alert when it's time */}
+      {showVisualAlert && (
+         <div className="mx-6 mt-4 p-4 bg-red-600 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] flex items-center justify-between animate-bounceIn relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-500 to-red-600 opacity-50 animate-pulse"></div>
+            <div className="relative z-10 flex items-center gap-3">
+               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-red-600">
+                  <Dumbbell className="w-6 h-6" />
+               </div>
+               <div>
+                  <h3 className="font-black text-white italic uppercase text-sm">Hora do Treino!</h3>
+                  <p className="text-white/90 text-xs">Sem desculpas hoje, hein?</p>
+               </div>
+            </div>
+            <button 
+                onClick={() => setShowVisualAlert(false)} 
+                className="relative z-10 p-2 bg-black/20 rounded-full text-white hover:bg-black/40"
+            >
+                <X className="w-4 h-4" />
+            </button>
+         </div>
+      )}
 
       <div className="px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -199,6 +297,59 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
              )}
          </div>
       </div>
+
+      {/* MODAL: Configurar Lembrete */}
+      {showReminderModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm p-6 animate-fadeIn">
+            <div className="bg-zinc-900 w-full max-w-sm rounded-3xl border border-zinc-800 shadow-2xl overflow-hidden">
+                <div className="p-5 border-b border-zinc-800 flex justify-between items-center bg-black/40">
+                    <h3 className="text-white font-black italic text-lg uppercase flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-red-600" /> Lembrete de Treino
+                    </h3>
+                    <button onClick={() => setShowReminderModal(false)} className="p-1 rounded-full hover:bg-zinc-800">
+                        <X className="w-6 h-6 text-zinc-500" />
+                    </button>
+                </div>
+                
+                <div className="p-6 space-y-6">
+                    <div className="flex items-center justify-between">
+                        <label className="text-sm font-bold text-zinc-300">Ativar Notificações</label>
+                        <button 
+                            onClick={() => setReminderEnabled(!reminderEnabled)}
+                            className={`w-14 h-8 rounded-full p-1 transition-colors duration-300 ${reminderEnabled ? 'bg-green-600' : 'bg-zinc-700'}`}
+                        >
+                            <div className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${reminderEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                        </button>
+                    </div>
+
+                    <div className={`space-y-2 transition-opacity duration-300 ${reminderEnabled ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                        <label className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Horário do Lembrete
+                        </label>
+                        <input 
+                            type="time" 
+                            value={reminderTime}
+                            onChange={(e) => setReminderTime(e.target.value)}
+                            className="w-full bg-black border border-zinc-700 rounded-xl p-4 text-white text-2xl font-mono focus:border-red-600 outline-none text-center"
+                        />
+                    </div>
+
+                    <div className="bg-zinc-800/50 p-3 rounded-lg border border-zinc-800">
+                        <p className="text-[10px] text-zinc-400 leading-relaxed">
+                            <strong className="text-red-500">Nota:</strong> Se o app estiver fechado, a notificação dependerá das permissões do seu navegador. Mantenha o app aberto ou em segundo plano para garantir o alerta visual.
+                        </p>
+                    </div>
+
+                    <button 
+                        onClick={handleSaveReminder}
+                        className="w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] transition-all"
+                    >
+                        Salvar Configuração
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 
@@ -240,7 +391,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
       </main>
 
       {/* Barra de Navegação Responsiva */}
-      <div className="fixed bottom-0 left-0 w-full z-50">
+      <div className="fixed bottom-0 left-0 w-full z-40">
         <div className="w-full md:max-w-4xl mx-auto bg-black/90 backdrop-blur-xl border-t border-zinc-800 pb-safe">
             <div className="grid grid-cols-4 h-16">
               <button 
