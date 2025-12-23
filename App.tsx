@@ -11,10 +11,12 @@ import WorkoutManagerScreen from './components/WorkoutManagerScreen';
 import StudentWorkoutsScreen from './components/StudentWorkoutsScreen';
 import RunningWorkoutsScreen from './components/RunningWorkoutsScreen';
 import { InstallPrompt } from './components/InstallPrompt';
+import { BackgroundWrapper } from './components/BackgroundWrapper'; // Importação Nova
 import './services/firebaseConfig';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  // currentView é o estado que controla qual tela aparece
   const [currentView, setCurrentView] = useState<ViewState>('LOGIN');
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -51,92 +53,100 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="w-full md:max-w-4xl mx-auto min-h-screen relative shadow-2xl overflow-hidden text-white font-sans bg-black">
+    // Envolvemos o app inteiro com o BackgroundWrapper
+    // Passamos 'currentView' como gatilho. Toda vez que ele mudar, o fundo muda.
+    <BackgroundWrapper trigger={currentView}>
       
-      <InstallPrompt />
+      {/* Removemos o 'bg-black' daqui, pois o fundo agora é transparente 
+         para mostrar a imagem do wrapper 
+      */}
+      <div className="w-full md:max-w-4xl mx-auto min-h-screen relative shadow-2xl overflow-hidden text-white font-sans bg-transparent">
+        
+        <InstallPrompt />
 
-      {currentView === 'LOGIN' && (
-        <LoginScreen onLogin={handleLogin} students={students} />
-      )}
+        {currentView === 'LOGIN' && (
+          <LoginScreen onLogin={handleLogin} students={students} />
+        )}
 
-      {currentView === 'STUDENT_DASHBOARD' && currentUser && (
-        <StudentDashboard 
-          user={currentUser} 
-          students={students}
-          onUpdateStudents={updateStudents}
-          onLogout={handleLogout}
-          onNavigate={handleNavigate}
-        />
-      )}
+        {currentView === 'STUDENT_DASHBOARD' && currentUser && (
+          <StudentDashboard 
+            user={currentUser} 
+            students={students}
+            onUpdateStudents={updateStudents}
+            onLogout={handleLogout}
+            onNavigate={handleNavigate}
+          />
+        )}
 
-      {currentView === 'PROFESSOR_DASHBOARD' && currentUser?.role === 'admin' && (
-        <ProfessorDashboard
-          students={students}
-          onUpdateStudents={updateStudents}
-          onLogout={handleLogout}
-          onSelectStudent={(id) => handleNavigate('ASSESSMENT_VIEW', id)}
-          onManageWorkouts={(id) => handleNavigate('WORKOUT_MANAGER', id)}
-        />
-      )}
+        {currentView === 'PROFESSOR_DASHBOARD' && currentUser?.role === 'admin' && (
+          <ProfessorDashboard
+            students={students}
+            onUpdateStudents={updateStudents}
+            onLogout={handleLogout}
+            onSelectStudent={(id) => handleNavigate('ASSESSMENT_VIEW', id)}
+            onManageWorkouts={(id) => handleNavigate('WORKOUT_MANAGER', id)}
+          />
+        )}
 
-      {currentView === 'ASSESSMENT_VIEW' && (
-        <AssessmentView
-          studentId={selectedStudentId || currentUser?.studentId}
-          currentUser={currentUser}
-          students={students}
-          onUpdateStudents={updateStudents}
-          onBack={() => {
-            if (currentUser?.role === 'admin') {
-              handleNavigate('PROFESSOR_DASHBOARD');
-            } else {
-              handleNavigate('STUDENT_DASHBOARD');
-            }
-          }}
-        />
-      )}
+        {currentView === 'ASSESSMENT_VIEW' && (
+          <AssessmentView
+            studentId={selectedStudentId || currentUser?.studentId}
+            currentUser={currentUser}
+            students={students}
+            onUpdateStudents={updateStudents}
+            onBack={() => {
+              if (currentUser?.role === 'admin') {
+                handleNavigate('PROFESSOR_DASHBOARD');
+              } else {
+                handleNavigate('STUDENT_DASHBOARD');
+              }
+            }}
+          />
+        )}
 
-      {currentView === 'WORKOUT_MANAGER' && currentUser?.role === 'admin' && selectedStudentId && (
-        <WorkoutManagerScreen 
-          studentId={selectedStudentId}
-          students={students}
-          onUpdateStudents={updateStudents}
-          onBack={() => handleNavigate('PROFESSOR_DASHBOARD')}
-        />
-      )}
+        {currentView === 'WORKOUT_MANAGER' && currentUser?.role === 'admin' && selectedStudentId && (
+          <WorkoutManagerScreen 
+            studentId={selectedStudentId}
+            students={students}
+            onUpdateStudents={updateStudents}
+            onBack={() => handleNavigate('PROFESSOR_DASHBOARD')}
+          />
+        )}
 
-      {currentView === 'STUDENT_WORKOUTS' && currentUser?.studentId && (
-        <StudentWorkoutsScreen 
-          studentId={currentUser.studentId}
-          students={students}
-          onBack={() => handleNavigate('STUDENT_DASHBOARD')}
-        />
-      )}
+        {currentView === 'STUDENT_WORKOUTS' && currentUser?.studentId && (
+          <StudentWorkoutsScreen 
+            studentId={currentUser.studentId}
+            students={students}
+            onBack={() => handleNavigate('STUDENT_DASHBOARD')}
+          />
+        )}
 
-      {currentView === 'RUNNING_WORKOUTS' && currentUser?.studentId && (
-        <RunningWorkoutsScreen 
-          studentId={currentUser.studentId}
-          students={students}
-          onUpdateStudents={updateStudents}
-          onBack={() => handleNavigate('STUDENT_DASHBOARD')}
-        />
-      )}
+        {currentView === 'RUNNING_WORKOUTS' && currentUser?.studentId && (
+          <RunningWorkoutsScreen 
+            studentId={currentUser.studentId}
+            students={students}
+            onUpdateStudents={updateStudents}
+            onBack={() => handleNavigate('STUDENT_DASHBOARD')}
+          />
+        )}
 
-      {currentView === 'GOALS_VIEW' && (
-        <GoalsAchievementsScreen 
-           studentId={currentUser?.studentId}
-           students={students}
-           onUpdateStudents={updateStudents}
-           onBack={() => handleNavigate('STUDENT_DASHBOARD')}
-        />
-      )}
+        {currentView === 'GOALS_VIEW' && (
+          <GoalsAchievementsScreen 
+             studentId={currentUser?.studentId}
+             students={students}
+             onUpdateStudents={updateStudents}
+             onBack={() => handleNavigate('STUDENT_DASHBOARD')}
+          />
+        )}
 
-      {currentView === 'AI_CHAT' && (
-        <AIChatScreen 
-          onBack={() => handleNavigate('STUDENT_DASHBOARD')}
-          userName={currentUser?.name || 'Atleta'}
-        />
-      )}
-    </div>
+        {currentView === 'AI_CHAT' && (
+          <AIChatScreen 
+            onBack={() => handleNavigate('STUDENT_DASHBOARD')}
+            userName={currentUser?.name || 'Atleta'}
+          />
+        )}
+      </div>
+    </BackgroundWrapper>
   );
 };
 

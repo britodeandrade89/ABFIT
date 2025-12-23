@@ -131,10 +131,10 @@ const RunningWorkoutsScreen: React.FC<RunningWorkoutsScreenProps> = ({
   if (!student) return <div>Aluno não encontrado</div>;
 
   return (
-    <div className="animate-fadeIn min-h-screen bg-[#110505] pb-24 font-sans relative">
+    <div className="animate-fadeIn min-h-screen bg-transparent pb-24 font-sans relative">
       
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#110505]/90 backdrop-blur-md pt-4 pb-4 px-4 shadow-xl border-b border-zinc-900 flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-[#110505]/80 backdrop-blur-md pt-4 pb-4 px-4 shadow-xl border-b border-zinc-800 flex items-center justify-between">
         <button onClick={onBack} className="text-zinc-400 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
         </button>
@@ -155,7 +155,7 @@ const RunningWorkoutsScreen: React.FC<RunningWorkoutsScreenProps> = ({
                 const monthStr = dateObj.toLocaleString('pt-BR', { month: 'short', timeZone: 'UTC' }).replace('.', '');
 
                 return (
-                <div key={workout.id} className={`relative rounded-r-xl overflow-hidden border-l-4 shadow-2xl transition-all ${isCompleted ? 'bg-zinc-900 border-l-green-600 opacity-60' : 'bg-[#1e293b] border-l-orange-500'}`}>
+                <div key={workout.id} className={`relative rounded-r-xl overflow-hidden border-l-4 shadow-2xl transition-all backdrop-blur-sm ${isCompleted ? 'bg-zinc-900/60 border-l-green-600 opacity-60' : 'bg-[#1e293b]/70 border-l-orange-500'}`}>
                     <div className="p-5">
                         
                         {/* Header Row */}

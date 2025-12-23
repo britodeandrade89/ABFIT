@@ -216,9 +216,9 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
   if (!student) return <div>Aluno não encontrado</div>;
 
   return (
-    <div className="animate-fadeIn min-h-screen bg-[#050505] flex flex-col">
+    <div className="animate-fadeIn min-h-screen bg-black/85 backdrop-blur-sm flex flex-col">
       {/* Header */}
-      <div className="bg-[#111] p-4 border-b border-zinc-800 flex justify-between items-center sticky top-0 z-20">
+      <div className="bg-[#111]/90 p-4 border-b border-zinc-800 flex justify-between items-center sticky top-0 z-20">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
@@ -252,7 +252,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         
         {/* LEFT COLUMN: WORKOUT BUILDER */}
-        <div className="flex-1 overflow-y-auto p-4 border-r border-zinc-800 custom-scrollbar pb-32 bg-[#050505]">
+        <div className="flex-1 overflow-y-auto p-4 border-r border-zinc-800 custom-scrollbar pb-32 bg-transparent">
             <div className="max-w-2xl mx-auto space-y-6">
                 
                 {/* Workout Metadata */}
@@ -343,7 +343,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         </div>
 
         {/* RIGHT COLUMN: TOOLS & DATABASE */}
-        <div className="w-full md:w-[400px] flex flex-col bg-[#0a0a0a] border-l border-zinc-800">
+        <div className="w-full md:w-[400px] flex flex-col bg-[#0a0a0a]/90 backdrop-blur-sm border-l border-zinc-800">
             {/* Tool Tabs */}
             <div className="flex border-b border-zinc-800">
                 <button 

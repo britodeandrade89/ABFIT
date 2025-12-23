@@ -52,15 +52,15 @@ export const ProfessorDashboard: React.FC<ProfessorDashboardProps> = ({
   };
 
   return (
-    <div className="animate-fadeIn min-h-screen pb-20">
-      <header className="p-6 flex justify-between items-center bg-black/90 backdrop-blur-md sticky top-0 z-20 border-b border-zinc-900">
+    <div className="animate-fadeIn min-h-screen pb-20 bg-transparent">
+      <header className="p-6 flex justify-between items-center bg-transparent backdrop-blur-sm sticky top-0 z-20 border-b border-white/5">
         <div>
           <h2 className="text-xl font-bold text-white">Painel do Treinador</h2>
           <p className="text-xs text-zinc-500">Gestão de Alunos</p>
         </div>
         <button 
           onClick={onLogout}
-          className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 border border-zinc-800"
+          className="w-10 h-10 rounded-full bg-zinc-900/50 flex items-center justify-center text-zinc-400 border border-zinc-800 backdrop-blur-md"
         >
           <LogOut className="w-4 h-4" />
         </button>
@@ -78,14 +78,14 @@ export const ProfessorDashboard: React.FC<ProfessorDashboardProps> = ({
         </div>
 
         {students.length === 0 ? (
-          <div className="text-center py-16 bg-zinc-900/50 rounded-2xl border border-zinc-800 border-dashed">
+          <div className="text-center py-16 bg-zinc-900/50 rounded-2xl border border-zinc-800 border-dashed backdrop-blur-sm">
             <Users className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
             <p className="text-zinc-500 text-sm font-medium">Nenhum aluno cadastrado.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {students.map(student => (
-              <div key={student.id} className="bg-zinc-900/80 p-4 rounded-xl border border-zinc-800 flex justify-between items-center backdrop-blur-sm">
+              <div key={student.id} className="bg-zinc-900/70 p-4 rounded-xl border border-zinc-800 flex justify-between items-center backdrop-blur-md">
                 <div>
                   <h4 className="text-white font-bold">{student.nome}</h4>
                   <p className="text-xs text-zinc-500">{student.email}</p>

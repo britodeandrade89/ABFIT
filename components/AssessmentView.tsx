@@ -68,8 +68,8 @@ const AssessmentView: React.FC<AssessmentViewProps> = ({
   })).slice(-6); // Last 6 entries
 
   return (
-    <div className="animate-fadeIn min-h-screen bg-black pb-20">
-      <div className="sticky top-0 z-20 bg-black/90 backdrop-blur-md border-b border-zinc-900 p-4 flex items-center justify-between shadow-2xl">
+    <div className="animate-fadeIn min-h-screen bg-transparent pb-20">
+      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-md border-b border-zinc-900 p-4 flex items-center justify-between shadow-2xl">
         <button 
           onClick={onBack}
           className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white border border-zinc-700"

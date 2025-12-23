@@ -61,8 +61,8 @@ const AIChatScreen: React.FC<AIChatScreenProps> = ({ onBack, userName }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black absolute inset-0 z-50 animate-fadeIn">
-      <div className="p-4 bg-black/80 border-b border-zinc-900 flex items-center gap-4 backdrop-blur-md">
+    <div className="flex flex-col h-screen bg-black/85 backdrop-blur-md absolute inset-0 z-50 animate-fadeIn">
+      <div className="p-4 bg-black/60 border-b border-zinc-800 flex items-center gap-4">
         <button 
           onClick={onBack}
           className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 border border-zinc-800 hover:text-white"
@@ -85,10 +85,10 @@ const AIChatScreen: React.FC<AIChatScreenProps> = ({ onBack, userName }) => {
             )}
             
             <div className={`
-              max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-md
+              max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-md backdrop-blur-sm
               ${msg.role === 'user' 
-                ? 'bg-zinc-800 text-white rounded-tr-none border border-zinc-700' 
-                : 'bg-zinc-900 text-zinc-300 rounded-tl-none border border-zinc-800'}
+                ? 'bg-zinc-800/80 text-white rounded-tr-none border border-zinc-700' 
+                : 'bg-zinc-900/80 text-zinc-300 rounded-tl-none border border-zinc-800'}
             `}>
               {msg.role === 'assistant' ? (
                 <div className="prose prose-invert prose-sm max-w-none">
@@ -120,13 +120,13 @@ const AIChatScreen: React.FC<AIChatScreenProps> = ({ onBack, userName }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSend} className="p-4 bg-black border-t border-zinc-900 flex gap-3">
+      <form onSubmit={handleSend} className="p-4 bg-black/60 border-t border-zinc-800 flex gap-3 backdrop-blur-md">
         <input 
           type="text" 
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           placeholder="Digite sua dúvida..." 
-          className="flex-1 bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-white placeholder-zinc-600 focus:border-red-600 focus:ring-1 focus:ring-red-600 outline-none transition-all"
+          className="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-2xl px-5 py-4 text-white placeholder-zinc-600 focus:border-red-600 focus:ring-1 focus:ring-red-600 outline-none transition-all"
         />
         <button 
           type="submit" 

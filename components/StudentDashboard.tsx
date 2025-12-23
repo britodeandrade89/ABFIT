@@ -117,7 +117,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
         <div className="grid grid-cols-4 gap-3">
              <button 
                 onClick={() => setActiveTab('WORKOUTS')}
-                className="col-span-2 bg-black border border-red-600/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-red-900/10 transition-colors shadow-lg shadow-red-900/10 h-32"
+                className="col-span-2 bg-black/50 backdrop-blur-sm border border-red-600/50 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-red-900/10 transition-colors shadow-lg shadow-red-900/10 h-32"
              >
                 <Dumbbell className="w-8 h-8 text-red-600" />
                 <span className="text-xs font-bold uppercase tracking-wider text-white">Ir para Treino</span>
@@ -125,25 +125,25 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
 
              <button 
                 onClick={() => onNavigate('ASSESSMENT_VIEW')}
-                className="col-span-2 bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-32"
+                className="col-span-2 bg-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 flex flex-col items-center justify-center gap-2 h-32"
              >
                 <ClipboardList className="w-8 h-8 text-pink-500" />
                 <span className="text-[10px] font-bold uppercase text-zinc-300">Minha Avaliação</span>
              </button>
 
-             <button onClick={() => onNavigate('RUNNING_WORKOUTS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => onNavigate('RUNNING_WORKOUTS')} className="bg-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <Activity className="w-6 h-6 text-orange-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Corrida</span>
              </button>
-             <button onClick={() => setActiveTab('GOALS')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => setActiveTab('GOALS')} className="bg-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <CalendarDays className="w-6 h-6 text-yellow-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Metas</span>
              </button>
-             <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => alert('Em breve')} className="bg-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <Map className="w-6 h-6 text-green-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Outdoor</span>
              </button>
-             <button onClick={() => alert('Em breve')} className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
+             <button onClick={() => alert('Em breve')} className="bg-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 h-24">
                 <Flag className="w-6 h-6 text-blue-500" />
                 <span className="text-[9px] font-bold uppercase text-zinc-300">Provas</span>
              </button>
@@ -203,7 +203,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, students, onU
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a0505] to-black text-white">
+    <div className="min-h-screen bg-transparent text-white">
       
       <main className="pb-20">
         {activeTab === 'HOME' && renderHome()}

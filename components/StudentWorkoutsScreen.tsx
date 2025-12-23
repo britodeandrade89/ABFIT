@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Student } from '../types';
 import { ArrowLeft, Play, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
@@ -100,10 +99,10 @@ const StudentWorkoutsScreen: React.FC<StudentWorkoutsScreenProps> = ({
   if (!student) return <div>Aluno não encontrado</div>;
 
   return (
-    <div className="animate-fadeIn min-h-screen bg-[#110505] pb-24 relative">
+    <div className="animate-fadeIn min-h-screen bg-transparent pb-24 relative">
       
       {/* HEADER / TIMER AREA */}
-      <div className="sticky top-0 z-30 bg-[#110505] pt-4 pb-4 px-4 shadow-xl">
+      <div className="sticky top-0 z-30 bg-[#110505]/80 backdrop-blur-md pt-4 pb-4 px-4 shadow-xl border-b border-white/5">
         <div className="flex items-center justify-between mb-2">
             <button onClick={onBack} className="text-zinc-400 hover:text-white">
                 <ArrowLeft className="w-5 h-5" />
@@ -144,7 +143,7 @@ const StudentWorkoutsScreen: React.FC<StudentWorkoutsScreenProps> = ({
         </div>
       </div>
 
-      <div className="px-3 space-y-3">
+      <div className="px-3 space-y-3 mt-4">
         {activeWorkout ? (
             activeWorkout.exercises.map((exercise, index) => {
                 const totalSets = parseInt(exercise.sets) || 3;

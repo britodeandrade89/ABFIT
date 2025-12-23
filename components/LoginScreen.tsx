@@ -71,20 +71,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, students }) => {
   return (
     <div 
       id="loginScreen" 
-      className="h-screen flex flex-col items-center justify-between p-8 w-full animate-fadeIn relative overflow-hidden"
+      className="h-screen flex flex-col items-center justify-between p-8 w-full animate-fadeIn relative overflow-hidden bg-transparent"
     >
-        {/* Background Image Layer */}
-        <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-            style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1637666062717-1c6bcfa4a4df?q=80&w=1000&auto=format&fit=crop')`,
-                filter: 'brightness(0.4) contrast(1.1)'
-            }}
-        />
-        
-        {/* Dark Overlay Gradient */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90"></div>
-
         {/* Top Spacer */}
         <div className="flex-1"></div>
 
