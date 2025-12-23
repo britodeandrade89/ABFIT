@@ -2,26 +2,34 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-// --- Configuração de Variáveis de Ambiente (Polyfill) ---
-// Isso garante que o app consiga ler a chave API tanto do .env do Vite
-// quanto de um fallback seguro, resolvendo o erro de conexão com a IA.
+// --- Configuração de Variáveis de Ambiente (Polyfill Robusto) ---
+// Executa antes de qualquer renderização para garantir que a chave esteja disponível.
 if (typeof window !== 'undefined') {
-  // Cria o objeto process.env se não existir no navegador
+  // 1. Garante que o objeto process.env existe no window
   if (!(window as any).process) {
     (window as any).process = { env: {} };
   }
+  if (!(window as any).process.env) {
+    (window as any).process.env = {};
+  }
   
-  // 1. Tenta pegar do Vite (Padrão correto)
-  // @ts-ignore
-  const viteEnv = import.meta.env?.VITE_API_KEY;
+  // 2. Tenta capturar a chave do ambiente de build (Vercel/Vite)
+  // Usamos 'as any' para evitar erros de linter se import.meta não for reconhecido
+  let viteEnv = undefined;
+  try {
+     viteEnv = (import.meta as any).env?.VITE_API_KEY;
+  } catch (e) {
+     console.warn("Vite env not detected");
+  }
   
-  // 2. Chave de Fallback (A que você forneceu) para garantir o funcionamento imediato
+  // 3. Chave Mestra (Fallback fornecido por você)
   const FALLBACK_KEY = "AIzaSyCJ9K6sovkNzeO_fuQbSPD9LnIUG0p8Da4";
 
-  // Define a chave para a biblioteca do Google usar
-  (window as any).process.env.API_KEY = viteEnv || FALLBACK_KEY;
+  // 4. Define a chave final globalmente
+  const finalKey = viteEnv || FALLBACK_KEY;
+  (window as any).process.env.API_KEY = finalKey;
   
-  console.log("Sistema ABFIT Iniciado. API Key configurada:", !!(window as any).process.env.API_KEY);
+  console.log("Sistema ABFIT Iniciado. Status da Chave API:", finalKey ? "OK (Configurada)" : "ERRO (Ausente)");
 }
 
 const rootElement = document.getElementById('root');

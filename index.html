@@ -168,5 +168,17 @@
     <!-- Entry point for React -->
     <script type="module" src="/main.tsx"></script>
 
+    <!-- Force Unregister Service Worker to prevent Caching Issues/Black Screen in Dev -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            console.log('Unregistering Service Worker:', registration);
+            registration.unregister();
+          }
+        });
+      }
+    </script>
 </body>
 </html>
+    

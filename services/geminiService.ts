@@ -14,11 +14,13 @@ Se usar informações da busca, cite as fontes.
 `;
 
 export const initializeChat = async () => {
-  // Garante o acesso à chave API, seja via process.env (Node/Polyfill) ou window global
-  const apiKey = process.env.API_KEY || (window as any).process?.env?.API_KEY;
+  // ACESSO SEGURO À CHAVE:
+  // Acessamos via (window as any).process para evitar "ReferenceError: process is not defined"
+  // que causa a tela preta em navegadores que não têm polyfill automático.
+  const apiKey = (window as any).process?.env?.API_KEY;
 
   if (!apiKey) {
-    console.error("CRÍTICO: API Key não encontrada. Verifique o arquivo .env ou o polyfill em main.tsx");
+    console.error("CRÍTICO: API Key não encontrada no window.process.env");
     return;
   }
 
@@ -48,7 +50,6 @@ export const sendMessage = async (message: string): Promise<string> => {
   }
   
   if (!chatSession) {
-    // Retorna mensagem amigável em vez de erro técnico
     return "Não foi possível conectar ao servidor da IA. Verifique sua conexão ou a chave API.";
   }
 
