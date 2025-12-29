@@ -121,6 +121,14 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
     }
   };
 
+  // Helper para obter API key de forma segura
+  const getApiKey = () => {
+    if (typeof process !== 'undefined' && process.env && process.env.API_KEY) return process.env.API_KEY;
+    // @ts-ignore
+    if (import.meta && import.meta.env && import.meta.env.VITE_API_KEY) return import.meta.env.VITE_API_KEY;
+    return '';
+  };
+
   const handleAiSend = async () => {
     if (!chatInput.trim()) return;
     const userMsg = chatInput;
@@ -130,7 +138,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
     setIsAiLoading(true);
 
     try {
-        const apiKey = process.env.API_KEY;
+        const apiKey = getApiKey();
         
         // Contexto inteligente do treino atual
         const workoutContext = `
@@ -146,7 +154,6 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         
         const ai = new GoogleGenAI({ apiKey });
         
-        // Uso da nova API @google/genai (versão ^0.1.0)
         const chat = ai.chats.create({
             model: "gemini-3-flash-preview",
             config: {
@@ -161,7 +168,7 @@ const WorkoutManagerScreen: React.FC<WorkoutManagerScreenProps> = ({
         setChatHistory(prev => [...prev, { role: 'model', text: response }]);
     } catch (error) {
         console.error(error);
-        setChatHistory(prev => [...prev, { role: 'model', text: "Erro: Verifique se a chave API 'VITE_API_KEY' está configurada no Vercel (Settings > Env Variables) e recarregue a página." }]);
+        setChatHistory(prev => [...prev, { role: 'model', text: "Erro de conexão com a IA. Verifique sua chave API." }]);
     } finally {
         setIsAiLoading(false);
     }

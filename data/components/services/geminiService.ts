@@ -13,12 +13,26 @@ Você tem acesso à busca do Google. Use-a sempre que precisar encontrar variaç
 Se usar informações da busca, cite as fontes.
 `;
 
+// Função auxiliar para pegar a chave API de onde estiver disponível
+const getApiKey = () => {
+  // 1. Tenta process.env (Vercel/Node)
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    return process.env.API_KEY;
+  }
+  // 2. Tenta import.meta.env (Vite Local)
+  // @ts-ignore
+  if (import.meta && import.meta.env && import.meta.env.VITE_API_KEY) {
+    // @ts-ignore
+    return import.meta.env.VITE_API_KEY;
+  }
+  return '';
+};
+
 export const initializeChat = async () => {
-  // O uso de process.env.API_KEY é obrigatório neste ambiente.
-  const apiKey = process.env.API_KEY;
+  const apiKey = getApiKey();
 
   if (!apiKey) {
-    console.error("CRÍTICO: API Key não encontrada (process.env.API_KEY).");
+    console.warn("IA: API Key não detectada. O chat pode não funcionar.");
     return;
   }
 
@@ -32,7 +46,7 @@ export const initializeChat = async () => {
         tools: [{ googleSearch: {} }]
       }
     });
-    console.log("IA Conectada com sucesso (Mode: Online).");
+    console.log("IA Conectada.");
   } catch (error) {
     console.error("Erro ao inicializar IA:", error);
   }
@@ -48,18 +62,18 @@ export const sendMessage = async (message: string): Promise<string> => {
   }
   
   if (!chatSession) {
-    return "Não foi possível conectar ao servidor da IA. Verifique sua conexão ou a chave API.";
+    return "O chat está offline no momento (Chave API não configurada ou erro de conexão).";
   }
 
   try {
     const result = await chatSession.sendMessage({ message });
-    let responseText = result.text || "Desculpe, não consegui processar sua resposta no momento.";
+    let responseText = result.text || "Sem resposta.";
     
     // Processamento de Grounding (Fontes)
     const groundingChunks = result.candidates?.[0]?.groundingMetadata?.groundingChunks;
     
     if (groundingChunks && groundingChunks.length > 0) {
-        let sourcesText = "\n\n**Fontes consultadas:**\n";
+        let sourcesText = "\n\n**Fontes:**\n";
         const uniqueLinks = new Set<string>();
         
         groundingChunks.forEach((chunk: any) => {
@@ -79,6 +93,6 @@ export const sendMessage = async (message: string): Promise<string> => {
     return responseText;
   } catch (error) {
     console.error("Gemini Error:", error);
-    return "Ocorreu um erro ao comunicar com a central. Tente novamente em instantes.";
+    return "Desculpe, ocorreu um erro na comunicação. Tente novamente.";
   }
 };
